@@ -1,0 +1,27 @@
+---
+deployment:
+  tasks:
+    # مسارات ثابتة
+    - 'REPO_PATH=/home/cerac/repositories/cerac'
+    - 'DOCROOT=/home/cerac/public_html'
+    - 'PHP_BIN=$(command -v php || echo /opt/cpanel/ea-php82/root/usr/bin/php)'
+    - 'COMPOSER_BIN=$(command -v composer || echo /opt/cpanel/composer/bin/composer)'
+
+    # تثبيت الحزم (لو Composer متوفر)
+    - 'cd $REPO_PATH && $COMPOSER_BIN install --no-dev --prefer-dist --no-interaction || true'
+
+    # تجهيز .env مرة أولى فقط (لن يكتب فوق الموجود)
+    - 'cd $REPO_PATH && [ -f .env ] || cp -n .env.example .env'
+
+    # أوامر لارافل
+    - 'cd $REPO_PATH && $PHP_BIN -v'
+    - 'cd $REPO_PATH && $PHP_BIN artisan key:generate --force || true'
+    - 'cd $REPO_PATH && $PHP_BIN artisan migrate --force || true'
+    - 'cd $REPO_PATH && $PHP_BIN artisan storage:link || true'
+    - 'cd $REPO_PATH && $PHP_BIN artisan optimize:clear || true'
+    - 'cd $REPO_PATH && $PHP_BIN artisan config:cache || true'
+    - 'cd $REPO_PATH && $PHP_BIN artisan route:cache || true'
+
+    # نشر مجلد public إلى الدومين
+    # ملاحظة: نستثني index.php حتى لا ينعطب التعديل اليدوي الذي ربطناه بالمشروع
+    - 'rsync -a --delete --exclude=index.php $REPO_PATH/public/ $DOCROOT/ || cp -a $REPO_PATH/public/. $DOCROOT/'
