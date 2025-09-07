@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PopupController;
 
 // Home page
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -21,45 +22,15 @@ Route::get('/products/{product}', [ProductController::class, 'show'])->name('pro
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
-// Popup API routes
-Route::get('/api/popups/active', function () {
-    $popups = \App\Models\Popup::currentlyActive()
-        ->ordered()
-        ->get()
-        ->map(function ($popup) {
-            return [
-                'id' => $popup->id,
-                'title' => $popup->title,
-                'type' => $popup->type,
-                'content' => $popup->content,
-                'image_url' => $popup->image_url,
-                'popup_images' => $popup->getMedia('popup_images')->map(fn($media) => [
-                    'url' => $media->getUrl(),
-                    'name' => $media->name,
-                ]),
-                'video_url' => $popup->video_url,
-                'youtube_url' => $popup->youtube_url,
-                'form_action' => $popup->form_action,
-                'form_fields' => $popup->form_fields,
-                'button_text' => $popup->button_text,
-                'button_url' => $popup->button_url,
-                'show_close_button' => $popup->show_close_button,
-                'auto_close' => $popup->auto_close,
-                'auto_close_delay' => $popup->auto_close_delay,
-                'show_once_per_session' => $popup->show_once_per_session,
-                'display_rules' => $popup->display_rules,
-                'width' => $popup->width,
-                'height' => $popup->height,
-                'position' => $popup->position,
-                'is_active' => $popup->is_active,
-                'starts_at' => $popup->starts_at,
-                'ends_at' => $popup->ends_at,
-            ];
-        });
-    return response()->json($popups);
-});
+// Popup routes
+Route::get('/popups/active', [PopupController::class, 'getActivePopups']);
+Route::post('/popups/{popup}/increment', [PopupController::class, 'incrementDisplayCount']);
 
-Route::post('/api/popups/{popup}/increment', function (\App\Models\Popup $popup) {
-    $popup->incrementDisplayCount();
-    return response()->json(['success' => true]);
-});
+// Debug and test routes
+Route::get('/test-popup', [PopupController::class, 'createTestPopup']);
+Route::get('/debug-popups', [PopupController::class, 'debugPopups']);
+Route::get('/force-popup', [PopupController::class, 'createTestPopup']);
+Route::get('/activate-popup', [PopupController::class, 'activatePopup']);
+Route::get('/activate-video-popup', [PopupController::class, 'activateVideoPopup']);
+Route::get('/test-all-popups', [PopupController::class, 'testAllPopups']);
+Route::get('/check-active-popups', [PopupController::class, 'checkActivePopups']);

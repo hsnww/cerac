@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SiteSettings\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Schemas\Schema;
 
 class SiteSettingInfolist
@@ -11,6 +12,27 @@ class SiteSettingInfolist
     {
         return $schema
             ->components([
+                ImageEntry::make('logo')
+                    ->label('شعار الموقع')
+                    ->disk('public')
+                    ->size(200)
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('logo');
+                    }),
+                ImageEntry::make('logo_light')
+                    ->label('شعار الموقع الفاتح')
+                    ->disk('public')
+                    ->size(200)
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('logo_light');
+                    }),
+                ImageEntry::make('favicon')
+                    ->label('أيقونة الموقع')
+                    ->disk('public')
+                    ->size(100)
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('favicon');
+                    }),
                 TextEntry::make('site_name'),
                 TextEntry::make('site_description'),
                 TextEntry::make('contact_phone'),

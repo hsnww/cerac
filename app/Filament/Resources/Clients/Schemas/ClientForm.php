@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Clients\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 
 class ClientForm
@@ -24,6 +25,15 @@ class ClientForm
                     ->required()
                     ->numeric()
                     ->default(0),
+                FileUpload::make('logo')
+                    ->label('شعار العميل')
+                    ->image()
+                    ->disk('public')
+                    ->directory('clients')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'])
+                    ->maxSize(2048)
+                    ->columnSpanFull(),
             ]);
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Popup extends Model implements HasMedia
 {
@@ -47,6 +48,29 @@ class Popup extends Model implements HasMedia
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // When a popup is activated, deactivate all others
+        static::updating(function ($popup) {
+            if ($popup->isDirty('is_active') && $popup->is_active) {
+                // Deactivate all other popups
+                static::where('id', '!=', $popup->id)
+                    ->update(['is_active' => false]);
+            }
+        });
+
+        // When a new popup is created and activated, deactivate all others
+        static::creating(function ($popup) {
+            if ($popup->is_active) {
+                // Deactivate all other popups
+                static::where('id', '!=', $popup->id)
+                    ->update(['is_active' => false]);
+            }
+        });
+    }
 
     public function scopeActive($query)
     {
@@ -130,5 +154,15 @@ class Popup extends Model implements HasMedia
         
         // Fallback to direct image_url field
         return $this->attributes['image_url'] ?? null;
+    }
+
+    public function getMediaUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('popup_images');
+    }
+
+    public function getMediaUrlsAttribute(): array
+    {
+        return $this->getMedia('popup_images')->map(fn($media) => $media->getUrl())->toArray();
     }
 }

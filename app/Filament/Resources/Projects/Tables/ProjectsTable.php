@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 
 class ProjectsTable
@@ -16,6 +17,13 @@ class ProjectsTable
     {
         return $table
             ->columns([
+                ImageColumn::make('cover_image')
+                    ->label('صورة الغلاف')
+                    ->disk('public')
+                    ->size(60)
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('cover_image');
+                    }),
                 TextColumn::make('title_ar')
                     ->searchable(),
                 TextColumn::make('title_en')

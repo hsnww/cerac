@@ -4,6 +4,7 @@ namespace App\Filament\Resources\HeroSlides\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Schemas\Schema;
 
 class HeroSlideInfolist
@@ -12,6 +13,13 @@ class HeroSlideInfolist
     {
         return $schema
             ->components([
+                ImageEntry::make('hero_image')
+                    ->label('صورة الشريحة')
+                    ->disk('public')
+                    ->size(200)
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('hero_image');
+                    }),
                 TextEntry::make('title'),
                 TextEntry::make('subtitle'),
                 TextEntry::make('button_text'),

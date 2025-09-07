@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SiteSettings\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 
 class SiteSettingForm
@@ -32,6 +33,33 @@ class SiteSettingForm
                 Textarea::make('about_text')
                     ->columnSpanFull(),
                 Textarea::make('services_text')
+                    ->columnSpanFull(),
+                FileUpload::make('logo')
+                    ->label('شعار الموقع')
+                    ->image()
+                    ->disk('public')
+                    ->directory('site-settings')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'])
+                    ->maxSize(2048)
+                    ->columnSpanFull(),
+                FileUpload::make('logo_light')
+                    ->label('شعار الموقع الفاتح')
+                    ->image()
+                    ->disk('public')
+                    ->directory('site-settings')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'])
+                    ->maxSize(2048)
+                    ->columnSpanFull(),
+                FileUpload::make('favicon')
+                    ->label('أيقونة الموقع')
+                    ->image()
+                    ->disk('public')
+                    ->directory('site-settings')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/png', 'image/ico', 'image/svg+xml'])
+                    ->maxSize(512)
                     ->columnSpanFull(),
             ]);
     }

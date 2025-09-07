@@ -5,6 +5,7 @@ namespace App\Filament\Resources\HeroSlides\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 
 class HeroSlideForm
@@ -28,6 +29,15 @@ class HeroSlideForm
                     ->required()
                     ->numeric()
                     ->default(0),
+                FileUpload::make('hero_image')
+                    ->label('صورة الشريحة')
+                    ->image()
+                    ->disk('public')
+                    ->directory('hero-slides')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+                    ->maxSize(2048)
+                    ->columnSpanFull(),
             ]);
     }
 }

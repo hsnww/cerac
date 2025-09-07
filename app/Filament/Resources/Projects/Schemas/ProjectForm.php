@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Projects\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 
 class ProjectForm
@@ -36,6 +37,25 @@ class ProjectForm
                     ->required()
                     ->numeric()
                     ->default(0),
+                FileUpload::make('cover_image')
+                    ->label('صورة الغلاف')
+                    ->image()
+                    ->disk('public')
+                    ->directory('projects/cover')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+                    ->maxSize(2048)
+                    ->columnSpanFull(),
+                FileUpload::make('gallery')
+                    ->label('معرض الصور')
+                    ->image()
+                    ->disk('public')
+                    ->directory('projects/gallery')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+                    ->maxSize(2048)
+                    ->multiple()
+                    ->columnSpanFull(),
             ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Partners\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Schema;
 
 class PartnerForm
@@ -28,6 +29,15 @@ class PartnerForm
                     ->required()
                     ->numeric()
                     ->default(0),
+                FileUpload::make('logo')
+                    ->label('شعار الشريك')
+                    ->image()
+                    ->disk('public')
+                    ->directory('partners')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'])
+                    ->maxSize(2048)
+                    ->columnSpanFull(),
             ]);
     }
 }

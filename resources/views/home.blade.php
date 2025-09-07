@@ -107,7 +107,7 @@
                                 <p class="text-lg md:text-xl mb-8 text-white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">{{ $slide->description_ar }}</p>
                             @endif
                             @if($slide->button_text_ar && $slide->button_url)
-                                <a href="{{ $slide->button_url }}" class="inline-block bg-yellow-500 text-black px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-400 transition duration-300">
+                                <a href="{{ $slide->button_url }}" class="inline-block text-white px-8 py-4 rounded-lg text-lg font-semibold btn-primary">
                                     {{ $slide->button_text_ar }}
                                 </a>
                             @endif
@@ -233,13 +233,13 @@
                             </div>
                         @endif
                         <div class="flex flex-col gap-2">
-                            <a href="{{ route('products.show', $product) }}" class="inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
+                            <a href="{{ route('products.show', $product) }}" class="inline-flex items-center justify-center text-white px-4 py-2 rounded-lg font-semibold btn-primary">
                                 عرض التفاصيل
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
                             </a>
-                            <a href="{{ route('contact') }}" class="inline-flex items-center justify-center border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition font-semibold">
+                            <a href="{{ route('contact') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg font-semibold btn-secondary">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                                 </svg>
@@ -251,7 +251,7 @@
                 @endforeach
             </div>
             <div class="text-center mt-12">
-                <a href="{{ route('products.index') }}" class="inline-flex items-center bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <a href="{{ route('products.index') }}" class="inline-flex items-center text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 btn-primary">
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -331,7 +331,7 @@
                 @endforeach
             </div>
             <div class="text-center mt-12">
-                <a href="{{ route('projects.index') }}" class="inline-flex items-center bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <a href="{{ route('projects.index') }}" class="inline-flex items-center text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 btn-primary">
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                     </svg>
@@ -401,7 +401,7 @@
                         </div>
                     </div>
                     <div class="mt-8">
-                        <a href="{{ route('contact') }}" class="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                        <a href="{{ route('contact') }}" class="inline-flex items-center text-white px-6 py-3 rounded-lg font-semibold btn-primary">
                             <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                             </svg>
@@ -412,13 +412,14 @@
                 <div>
                     <div class="bg-white rounded-lg overflow-hidden shadow-lg">
                         <iframe 
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3579.215175115508!2d50.190236624045696!3d26.222197089423002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e49c3889f2ad1b7%3A0x79e8d551b56efcdc!2zQ0VSQUMgLyDYs9mK2LHYp9mD!5e0!3m2!1sar!2ssa!4v1757097039759!5m2!1sar!2ssa"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3579.215175115508!2d50.190236624045696!3d26.222197089423002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e49c3889f2ad1b7%3A0x79e8d551b56efcdc!2zQ0VSQUMgLyDYs9mK2LHYp9mD!5e0!3m2!1sar!2ssa!4v1757097039759!5m2!1ار!2ssa" 
                             width="100%" 
                             height="300" 
                             style="border:0;" 
                             allowfullscreen="" 
                             loading="lazy" 
-                            referrerpolicy="no-referrer-when-downgrade">
+                            referrerpolicy="no-referrer-when-downgrade"
+                            sandbox="allow-scripts allow-same-origin allow-popups">
                         </iframe>
                     </div>
                 </div>
@@ -535,6 +536,7 @@
 
     <!-- Popup Component -->
     @include('components.popup')
+    
 
     <!-- Additional JavaScript for Hero Slider -->
     <script>

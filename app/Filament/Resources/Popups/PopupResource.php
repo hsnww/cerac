@@ -12,6 +12,7 @@ use App\Filament\Resources\Popups\Tables\PopupsTable;
 use App\Models\Popup;
 use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -31,6 +32,8 @@ class PopupResource extends Resource
     protected static ?string $pluralModelLabel = 'النوافذ المنبثقة';
 
     protected static ?int $navigationSort = 1;
+
+    protected static string|UnitEnum|null $navigationGroup = 'إدارة المحتوى';
 
     public static function form(Schema $schema): Schema
     {

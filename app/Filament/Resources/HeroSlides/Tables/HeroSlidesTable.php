@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 
 class HeroSlidesTable
@@ -16,6 +17,13 @@ class HeroSlidesTable
     {
         return $table
             ->columns([
+                ImageColumn::make('hero_image')
+                    ->label('صورة الشريحة')
+                    ->disk('public')
+                    ->size(60)
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('hero_image');
+                    }),
                 TextColumn::make('title')
                     ->searchable(),
                 TextColumn::make('subtitle')

@@ -82,11 +82,101 @@ body {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: none;
+    background: #1cabe3;
     border: none;
     font-size: 24px;
     cursor: pointer;
     z-index: 10000;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(28, 171, 227, 0.3);
+}
+
+.popup-close:hover {
+    background: #0e183c;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(14, 24, 60, 0.4);
+}
+
+/* Popup Button Styles */
+.popup-button-primary {
+    background: #1cabe3;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(28, 171, 227, 0.3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.popup-button-primary:hover {
+    background: #0e183c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 24, 60, 0.4);
+}
+
+.popup-button-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: #0e183c;
+    padding: 12px 24px;
+    border: 2px solid #0e183c;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.popup-button-secondary:hover {
+    background: #0e183c;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 24, 60, 0.4);
+}
+
+/* Home Page Button Styles */
+.btn-primary {
+    background-color: #1cabe3;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(28, 171, 227, 0.3);
+}
+
+.btn-primary:hover {
+    background-color: #0e183c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 24, 60, 0.4);
+}
+
+.btn-secondary {
+    border: 2px solid #0e183c;
+    color: #0e183c;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #0e183c;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 24, 60, 0.4);
 }
 
 /* Swiper Custom Styles */

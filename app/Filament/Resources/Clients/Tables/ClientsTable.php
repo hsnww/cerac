@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 
 class ClientsTable
@@ -16,6 +17,13 @@ class ClientsTable
     {
         return $table
             ->columns([
+                ImageColumn::make('logo')
+                    ->label('الشعار')
+                    ->disk('public')
+                    ->size(60)
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('logo');
+                    }),
                 TextColumn::make('name_ar')
                     ->searchable(),
                 TextColumn::make('name_en')

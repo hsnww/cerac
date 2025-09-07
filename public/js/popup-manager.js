@@ -39,10 +39,14 @@ class PopupManager {
         this.isLoading = true;
 
         try {
-            const response = await fetch('/api/popups/active');
+            console.log('Loading popups...');
+            const response = await fetch('/popups/active');
+            console.log('Response status:', response.status);
+            
             if (!response.ok) throw new Error('Failed to load popups');
             
             this.popups = await response.json();
+            console.log('Loaded popups:', this.popups);
             this.showNextPopup();
         } catch (error) {
             console.error('Error loading popups:', error);
@@ -52,21 +56,32 @@ class PopupManager {
     }
 
     showNextPopup() {
-        if (this.popups.length === 0) return;
+        console.log('showNextPopup called, popups count:', this.popups.length);
+        if (this.popups.length === 0) {
+            console.log('No popups to show');
+            return;
+        }
 
         // Find popup that should be shown
         const popupToShow = this.popups.find(popup => this.shouldShowPopup(popup));
+        console.log('Popup to show:', popupToShow);
         
         if (popupToShow) {
             this.showPopup(popupToShow);
+        } else {
+            console.log('No popup should be shown');
         }
     }
 
     shouldShowPopup(popup) {
+        console.log('Checking if popup should show:', popup);
+        
         // Check if popup was already shown in this session
         if (popup.show_once_per_session) {
             const shownPopups = JSON.parse(sessionStorage.getItem('shownPopups') || '[]');
+            console.log('Shown popups in session:', shownPopups);
             if (shownPopups.includes(popup.id)) {
+                console.log('Popup already shown in this session');
                 return false;
             }
         }
@@ -77,14 +92,18 @@ class PopupManager {
             // For now, we'll show all popups
         }
 
+        console.log('Popup should be shown');
         return true;
     }
 
     showPopup(popupData) {
+        console.log('showPopup called with:', popupData);
         this.currentPopup = popupData;
         const container = document.getElementById('popup-container');
         const content = document.getElementById('popup-content');
         const body = document.getElementById('popup-body');
+        
+        console.log('Container elements:', { container, content, body });
 
         // Set popup dimensions
         content.style.width = `${popupData.width}px`;
@@ -140,11 +159,21 @@ class PopupManager {
     }
 
     renderPosterPopup(popupData) {
-        const imageUrl = popupData.image_url;
+        // Try to get image from Spatie Media Library first, then fallback to image_url
+        const imageUrl = (popupData.popup_images && popupData.popup_images.length > 0) 
+            ? popupData.popup_images[0].url 
+            : popupData.image_url;
         return `
             <div class="relative w-full h-full">
                 ${imageUrl ? 
-                    `<img src="${imageUrl}" alt="${popupData.title}" class="w-full h-full object-cover">` : 
+                    `<img src="${imageUrl}" alt="${popupData.title}" class="w-full h-full object-cover" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                     <div class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-center p-8" style="display:none;">
+                         <div>
+                             <h3 class="text-2xl font-bold mb-4">${popupData.title}</h3>
+                             <p class="text-lg">${popupData.content || 'مرحباً بكم في سيراك'}</p>
+                         </div>
+                     </div>` : 
                     this.renderEmptyState('صورة', 'لا توجد صورة متاحة')
                 }
                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
@@ -329,7 +358,7 @@ class PopupManager {
 
     async incrementDisplayCount(popupId) {
         try {
-            await fetch(`/api/popups/${popupId}/increment`, {
+            await fetch(`/popups/${popupId}/increment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -377,7 +406,9 @@ class PopupManager {
 
 // Initialize popup manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing PopupManager...');
     window.popupManager = new PopupManager();
+    console.log('PopupManager initialized:', window.popupManager);
 });
 
 // Add custom CSS for responsive sizing

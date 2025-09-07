@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Projects\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Schemas\Schema;
 
 class ProjectInfolist
@@ -12,6 +13,13 @@ class ProjectInfolist
     {
         return $schema
             ->components([
+                ImageEntry::make('cover_image')
+                    ->label('صورة الغلاف')
+                    ->disk('public')
+                    ->size(200)
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('cover_image');
+                    }),
                 TextEntry::make('title_ar'),
                 TextEntry::make('title_en'),
                 TextEntry::make('video_url'),
