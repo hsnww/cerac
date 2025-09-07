@@ -9,8 +9,10 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 
-class User extends Authenticatable implements HasMedia
+class User extends Authenticatable implements HasMedia, FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles, InteractsWithMedia;
@@ -50,5 +52,19 @@ class User extends Authenticatable implements HasMedia
             'password' => 'hashed',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * تحقق من إمكانية وصول المستخدم إلى لوحة التحكم بناءً على دوره.
+     * في مشروع CERAC، فقط المستخدمون الذين لديهم صلاحية super-admin أو admin
+     * يمكنهم الوصول إلى لوحة التحكم.
+     *
+     * @param Panel $panel
+     * @return bool
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // التحقق من أن المستخدم لديه دور super-admin أو admin
+        return $this->hasRole(['super-admin', 'admin']);
     }
 }
