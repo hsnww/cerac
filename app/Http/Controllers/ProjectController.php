@@ -5,19 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\Client;
+use App\Models\SiteSetting;
 
 class ProjectController extends Controller
 {
     public function index()
     {
+        $settings = SiteSetting::getSettings();
         $featuredProjects = Project::with('client')->active()->featured()->ordered()->get();
         $allProjects = Project::with('client')->active()->ordered()->paginate(12);
         
-        return view('projects.index', compact('featuredProjects', 'allProjects'));
+        return view('projects.index', compact('featuredProjects', 'allProjects', 'settings'));
     }
 
     public function show(Project $project)
     {
+        $settings = SiteSetting::getSettings();
         $project->load('client');
         
         // Get related projects (same client)
@@ -29,7 +32,7 @@ class ProjectController extends Controller
             ->take(3)
             ->get();
 
-        return view('projects.show', compact('project', 'relatedProjects'));
+        return view('projects.show', compact('project', 'relatedProjects', 'settings'));
     }
 }
 

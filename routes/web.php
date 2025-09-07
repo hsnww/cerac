@@ -5,10 +5,14 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\PopupController;
 
 // Home page
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// About page
+Route::get('/about', [AboutController::class, 'index'])->name('about');
 
 // Projects pages
 Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');

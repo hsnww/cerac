@@ -19,7 +19,7 @@ class HomeController extends Controller
         $products = Product::active()->ordered()->take(6)->get();
         $clients = Client::active()->ordered()->get();
         $partners = Partner::active()->ordered()->get();
-        $featuredProjects = Project::with('client')->active()->featured()->ordered()->take(3)->get();
+        $projects = Project::with('client')->active()->featured()->ordered()->take(6)->get();
 
         return view('home', compact(
             'settings',
@@ -27,7 +27,7 @@ class HomeController extends Controller
             'products',
             'clients',
             'partners',
-            'featuredProjects'
+            'projects'
         ));
     }
 }
