@@ -2,56 +2,68 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Partner;
 
 class PartnerSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
+        // حذف البيانات الموجودة مسبقاً
+        Partner::query()->delete();
+        
         $partners = [
             [
-                'name_ar' => 'شركة البناء المتقدم',
-                'name_en' => 'Advanced Construction Co.',
-                'description_ar' => 'شريكنا في مشاريع البناء والتشييد',
-                'description_en' => 'Our partner in construction and building projects',
-                'website_url' => 'https://www.advanced-construction.com',
+                'name_ar' => 'شركة التوزيع المتخصصة',
+                'name_en' => 'Specialized Distribution Co.',
+                'website_url' => 'https://specialized-dist.com',
+                'contact_phone' => '+966501234567',
+                'contact_email' => 'info@specialized-dist.com',
+                'is_featured' => true,
                 'is_active' => true,
                 'sort_order' => 1,
             ],
             [
-                'name_ar' => 'مؤسسة التوزيع الحديث',
-                'name_en' => 'Modern Distribution Foundation',
-                'description_ar' => 'شريكنا في توزيع المنتجات',
-                'description_en' => 'Our partner in product distribution',
-                'website_url' => 'https://www.modern-dist.com',
+                'name_ar' => 'مؤسسة التسويق الذكي',
+                'name_en' => 'Smart Marketing Est.',
+                'website_url' => 'https://smart-marketing.com',
+                'contact_phone' => '+966501234568',
+                'contact_email' => 'contact@smart-marketing.com',
+                'is_featured' => true,
                 'is_active' => true,
                 'sort_order' => 2,
             ],
             [
-                'name_ar' => 'شركة التقنيات الصناعية',
-                'name_en' => 'Industrial Technologies Co.',
-                'description_ar' => 'شريكنا في التقنيات الصناعية',
-                'description_en' => 'Our partner in industrial technologies',
-                'website_url' => 'https://www.industrial-tech.com',
+                'name_ar' => 'شركة الخدمات اللوجستية',
+                'name_en' => 'Logistics Services Co.',
+                'website_url' => 'https://logistics-services.com',
+                'contact_phone' => '+966501234569',
+                'contact_email' => 'support@logistics-services.com',
+                'is_featured' => true,
                 'is_active' => true,
                 'sort_order' => 3,
             ],
             [
-                'name_ar' => 'مجموعة المقاولين المتحدين',
-                'name_en' => 'United Contractors Group',
-                'description_ar' => 'شريكنا في مشاريع المقاولات',
-                'description_en' => 'Our partner in contracting projects',
-                'website_url' => 'https://www.united-contractors.com',
+                'name_ar' => 'مجموعة الموردين المحليين',
+                'name_en' => 'Local Suppliers Group',
+                'website_url' => 'https://local-suppliers.com',
+                'contact_phone' => '+966501234570',
+                'contact_email' => 'sales@local-suppliers.com',
+                'is_featured' => true,
                 'is_active' => true,
                 'sort_order' => 4,
             ],
             [
-                'name_ar' => 'شركة الخدمات اللوجستية',
-                'name_en' => 'Logistics Services Co.',
-                'description_ar' => 'شريكنا في الخدمات اللوجستية',
-                'description_en' => 'Our partner in logistics services',
-                'website_url' => 'https://www.logistics-services.com',
+                'name_ar' => 'شركة التطوير التقني',
+                'name_en' => 'Technical Development Co.',
+                'website_url' => 'https://tech-development.com',
+                'contact_phone' => '+966501234571',
+                'contact_email' => 'tech@tech-development.com',
+                'is_featured' => true,
                 'is_active' => true,
                 'sort_order' => 5,
             ],
@@ -62,5 +74,3 @@ class PartnerSeeder extends Seeder
         }
     }
 }
-
-

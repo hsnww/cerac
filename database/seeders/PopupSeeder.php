@@ -2,153 +2,175 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Popup;
 
 class PopupSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        // Poster popup
-        $posterPopup = Popup::create([
-            'title' => 'مرحباً بكم في سيراك',
-            'type' => 'poster',
-            'content' => 'اكتشفوا منتجاتنا المتميزة من الغراء والمواد اللاصقة عالية الجودة',
-            'button_text' => 'استكشف المنتجات',
-            'button_url' => '#products',
-            'show_close_button' => true,
-            'auto_close' => false,
-            'show_once_per_session' => true,
-            'width' => 800,
-            'height' => 600,
-            'position' => 'center',
-            'is_active' => true,
-            'sort_order' => 1,
-        ]);
-
-        // Add placeholder image using Spatie Media
-        $posterPopup->addMediaFromUrl('https://via.placeholder.com/800x600/3b82f6/ffffff?text=مرحباً+بكم+في+سيراك')
-            ->toMediaCollection('popup_images');
-
-        // YouTube video popup
-        Popup::create([
-            'title' => 'شاهد فيديو عن منتجاتنا',
-            'type' => 'youtube',
-            'youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-            'button_text' => 'شاهد الآن',
-            'button_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-            'show_close_button' => true,
-            'auto_close' => true,
-            'auto_close_delay' => 15,
-            'show_once_per_session' => false,
-            'width' => 900,
-            'height' => 600,
-            'position' => 'center',
-            'is_active' => true,
-            'sort_order' => 2,
-        ]);
-
-        // Contact form popup
-        Popup::create([
-            'title' => 'تواصل معنا',
-            'type' => 'form',
-            'content' => 'هل لديك استفسار أو تريد معرفة المزيد عن منتجاتنا؟',
-            'form_action' => '/contact',
-            'form_fields' => [
-                [
-                    'name' => 'name',
-                    'label' => 'الاسم',
-                    'type' => 'text',
-                    'required' => true,
-                    'placeholder' => 'أدخل اسمك'
-                ],
-                [
-                    'name' => 'email',
-                    'label' => 'البريد الإلكتروني',
-                    'type' => 'email',
-                    'required' => true,
-                    'placeholder' => 'أدخل بريدك الإلكتروني'
-                ],
-                [
-                    'name' => 'phone',
-                    'label' => 'رقم الهاتف',
-                    'type' => 'tel',
-                    'required' => false,
-                    'placeholder' => 'أدخل رقم هاتفك'
-                ],
-                [
-                    'name' => 'message',
-                    'label' => 'الرسالة',
-                    'type' => 'textarea',
-                    'required' => true,
-                    'placeholder' => 'اكتب رسالتك هنا'
-                ]
+        // حذف البيانات الموجودة مسبقاً
+        Popup::query()->delete();
+        
+        $popups = [
+            [
+                'title' => 'مرحباً بكم في سيراك',
+                'type' => 'poster',
+                'content' => 'اكتشفوا منتجاتنا المتميزة من الغراء والمواد اللاصقة عالية الجودة',
+                'image_url' => 'https://via.placeholder.com/800x600/3b82f6/ffffff?text=مرحباً+بكم+في+سيراك',
+                'video_url' => null,
+                'youtube_url' => null,
+                'form_action' => null,
+                'form_fields' => null,
+                'button_text' => 'استكشف المنتجات',
+                'button_url' => '#products',
+                'show_close_button' => true,
+                'auto_close' => false,
+                'auto_close_delay' => null,
+                'show_once_per_session' => true,
+                'display_rules' => '[]',
+                'width' => 600,
+                'height' => 840,
+                'position' => 'center',
+                'is_active' => true,
+                'sort_order' => 1,
+                'display_count' => 20,
+                'starts_at' => '2025-09-04 05:49:09',
+                'ends_at' => '2025-09-13 05:49:11',
             ],
-            'button_text' => 'إغلاق',
-            'button_url' => null,
-            'show_close_button' => true,
-            'auto_close' => false,
-            'show_once_per_session' => true,
-            'width' => 600,
-            'height' => 700,
-            'position' => 'center',
-            'is_active' => true,
-            'sort_order' => 3,
-        ]);
-
-        // Survey popup
-        Popup::create([
-            'title' => 'استطلاع رأي',
-            'type' => 'survey',
-            'content' => 'نقدر آراءكم! شاركونا رأيكم في خدماتنا',
-            'form_action' => '/survey',
-            'form_fields' => [
-                [
-                    'name' => 'satisfaction',
-                    'label' => 'كيف تقيم خدماتنا؟',
-                    'type' => 'select',
-                    'required' => true,
-                    'placeholder' => 'اختر تقييمك'
-                ],
-                [
-                    'name' => 'suggestions',
-                    'label' => 'اقتراحاتكم',
-                    'type' => 'textarea',
-                    'required' => false,
-                    'placeholder' => 'شاركونا اقتراحاتكم'
-                ]
+            [
+                'title' => 'شاهد فيديو عن منتجاتنا',
+                'type' => 'youtube',
+                'content' => 'تعرفوا على منتجات سيراك المتميزة من خلال هذا الفيديو التوضيحي',
+                'image_url' => null,
+                'video_url' => null,
+                'youtube_url' => 'https://www.youtube.com/watch?v=NZsyqcc_Ffk',
+                'form_action' => null,
+                'form_fields' => null,
+                'button_text' => 'إغلاق',
+                'button_url' => null,
+                'show_close_button' => true,
+                'auto_close' => false,
+                'auto_close_delay' => null,
+                'show_once_per_session' => true,
+                'display_rules' => '[]',
+                'width' => 900,
+                'height' => 600,
+                'position' => 'center',
+                'is_active' => false,
+                'sort_order' => 2,
+                'display_count' => 6,
+                'starts_at' => '2025-09-06 05:17:36',
+                'ends_at' => '2025-09-14 05:17:41',
             ],
-            'button_text' => 'إغلاق',
-            'button_url' => null,
-            'show_close_button' => true,
-            'auto_close' => true,
-            'auto_close_delay' => 30,
-            'show_once_per_session' => true,
-            'width' => 500,
-            'height' => 600,
-            'position' => 'center',
-            'is_active' => true,
-            'sort_order' => 4,
-        ]);
+            [
+                'title' => 'تواصل معنا',
+                'type' => 'form',
+                'content' => 'هل لديك استفسار عن منتجاتنا؟ تواصل معنا وسنكون سعداء لمساعدتك',
+                'image_url' => null,
+                'video_url' => null,
+                'youtube_url' => null,
+                'form_action' => '/contact',
+                'form_fields' => '[{"name": "name", "type": "text", "label": "الاسم", "required": true, "placeholder": "أدخل اسمك"}, {"name": "email", "type": "email", "label": "البريد الإلكتروني", "required": true, "placeholder": "أدخل بريدك الإلكتروني"}, {"name": "phone", "type": "tel", "label": "رقم الهاتف", "required": false, "placeholder": "أدخل رقم هاتفك"}, {"name": "message", "type": "textarea", "label": "الرسالة", "required": true, "placeholder": "اكتب رسالتك هنا"}]',
+                'button_text' => 'إرسال',
+                'button_url' => null,
+                'show_close_button' => true,
+                'auto_close' => false,
+                'auto_close_delay' => null,
+                'show_once_per_session' => false,
+                'display_rules' => null,
+                'width' => 600,
+                'height' => 500,
+                'position' => 'center',
+                'is_active' => false,
+                'sort_order' => 3,
+                'display_count' => 2,
+                'starts_at' => null,
+                'ends_at' => null,
+            ],
+            [
+                'title' => 'استطلاع رضا العملاء',
+                'type' => 'survey',
+                'content' => 'نقدر آراءكم! شاركونا تقييمكم لخدماتنا',
+                'image_url' => null,
+                'video_url' => null,
+                'youtube_url' => null,
+                'form_action' => '/survey',
+                'form_fields' => '[{"name": "satisfaction", "type": "select", "label": "مستوى الرضا", "options": [{"label": "ممتاز", "value": "excellent"}, {"label": "جيد", "value": "good"}, {"label": "متوسط", "value": "average"}, {"label": "ضعيف", "value": "poor"}], "required": true}, {"name": "recommendation", "type": "select", "label": "هل تنصحون الآخرين بخدماتنا؟", "options": [{"label": "نعم بالتأكيد", "value": "yes"}, {"label": "ربما", "value": "maybe"}, {"label": "لا", "value": "no"}], "required": true}, {"name": "suggestions", "type": "textarea", "label": "اقتراحاتكم", "required": false, "placeholder": "شاركونا اقتراحاتكم لتحسين خدماتنا"}]',
+                'button_text' => 'إرسال التقييم',
+                'button_url' => null,
+                'show_close_button' => true,
+                'auto_close' => false,
+                'auto_close_delay' => null,
+                'show_once_per_session' => true,
+                'display_rules' => null,
+                'width' => 500,
+                'height' => 400,
+                'position' => 'center',
+                'is_active' => false,
+                'sort_order' => 4,
+                'display_count' => 2,
+                'starts_at' => null,
+                'ends_at' => null,
+            ],
+            [
+                'title' => 'عرض خاص',
+                'type' => 'custom',
+                'content' => '<div class="text-center"><h3 class="text-2xl font-bold text-blue-600 mb-4">عرض خاص!</h3><p class="text-lg mb-6">احصلوا على خصم 20% على جميع منتجاتنا هذا الشهر</p><div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">كود الخصم: <strong>SERAC20</strong></div></div>',
+                'image_url' => null,
+                'video_url' => null,
+                'youtube_url' => null,
+                'form_action' => null,
+                'form_fields' => null,
+                'button_text' => 'اطلب الآن',
+                'button_url' => '#contact',
+                'show_close_button' => true,
+                'auto_close' => true,
+                'auto_close_delay' => 10,
+                'show_once_per_session' => true,
+                'display_rules' => null,
+                'width' => 500,
+                'height' => 400,
+                'position' => 'center',
+                'is_active' => false,
+                'sort_order' => 5,
+                'display_count' => 2,
+                'starts_at' => null,
+                'ends_at' => null,
+            ],
+            [
+                'title' => 'مرحباً بكم في سيراك',
+                'type' => 'poster',
+                'content' => 'اكتشفوا منتجاتنا المتميزة من الغراء والمواد اللاصقة عالية الجودة',
+                'image_url' => 'https://via.placeholder.com/800x600/1cabe3/ffffff?text=مرحباً+بكم+في+سيراك',
+                'video_url' => null,
+                'youtube_url' => null,
+                'form_action' => null,
+                'form_fields' => null,
+                'button_text' => 'استكشف المنتجات',
+                'button_url' => '#products',
+                'show_close_button' => true,
+                'auto_close' => true,
+                'auto_close_delay' => null,
+                'show_once_per_session' => false,
+                'display_rules' => null,
+                'width' => 600,
+                'height' => 850,
+                'position' => 'center',
+                'is_active' => false,
+                'sort_order' => 1,
+                'display_count' => 66,
+                'starts_at' => '2025-09-07 01:49:55',
+                'ends_at' => '2026-03-07 01:49:55',
+            ],
+        ];
 
-        // Custom content popup
-        Popup::create([
-            'title' => 'عرض خاص',
-            'type' => 'custom',
-            'content' => '<div class="text-center p-8"><h3 class="text-2xl font-bold text-blue-600 mb-4">عرض خاص!</h3><p class="text-lg text-gray-700 mb-6">احصل على خصم 20% على جميع منتجاتنا هذا الشهر</p><div class="bg-yellow-100 p-4 rounded-lg"><p class="text-yellow-800 font-semibold">استخدم كود الخصم: CERAC20</p></div></div>',
-            'button_text' => 'اطلب الآن',
-            'button_url' => '#products',
-            'show_close_button' => true,
-            'auto_close' => true,
-            'auto_close_delay' => 20,
-            'show_once_per_session' => false,
-            'width' => 500,
-            'height' => 400,
-            'position' => 'center',
-            'is_active' => true,
-            'sort_order' => 5,
-        ]);
+        foreach ($popups as $popup) {
+            Popup::create($popup);
+        }
     }
 }
-
-

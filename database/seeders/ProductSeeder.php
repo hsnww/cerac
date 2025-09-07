@@ -2,89 +2,78 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
 
 class ProductSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
+        // حذف البيانات الموجودة مسبقاً
+        Product::query()->delete();
+        
         $products = [
             [
-                'name_ar' => 'غراء البناء الأبيض',
-                'name_en' => 'White Construction Adhesive',
-                'description_ar' => 'غراء عالي الجودة للبناء والديكور، مقاوم للماء والرطوبة',
-                'description_en' => 'High-quality adhesive for construction and decoration, water and moisture resistant',
-                'features_ar' => ['مقاوم للماء', 'قوة لصق عالية', 'سريع الجفاف', 'آمن للاستخدام'],
-                'features_en' => ['Water resistant', 'High bonding strength', 'Quick drying', 'Safe to use'],
-                'specifications_ar' => ['الوزن: 500 جرام', 'مدة الصلاحية: 24 شهر', 'درجة الحرارة: -10°C إلى +60°C'],
-                'specifications_en' => ['Weight: 500g', 'Shelf life: 24 months', 'Temperature: -10°C to +60°C'],
-                'price' => 25.00,
+                'title_ar' => 'غراء سيراك الأبيض',
+                'title_en' => 'CERAC White Adhesive',
+                'description_ar' => 'غراء بناء عالي الجودة للاستخدامات العامة في البناء والتشييد',
+                'description_en' => 'High-quality construction adhesive for general building and construction applications',
+                'features_ar' => '["مقاوم للماء والرطوبة", "قوة لصق عالية", "سريع الجفاف", "مناسب لجميع أنواع الأسطح", "سهولة التطبيق"]',
+                'features_en' => '["Water and moisture resistant", "High bonding strength", "Fast drying", "Suitable for all surface types", "Easy application"]',
                 'is_active' => true,
                 'sort_order' => 1,
             ],
             [
-                'name_ar' => 'غراء الخشب المتخصص',
-                'name_en' => 'Specialized Wood Glue',
-                'description_ar' => 'غراء مخصص للأخشاب، يوفر قوة لصق استثنائية',
-                'description_en' => 'Specialized wood glue that provides exceptional bonding strength',
-                'features_ar' => ['قوة لصق عالية', 'شفاف بعد الجفاف', 'مقاوم للرطوبة', 'سهل التطبيق'],
-                'features_en' => ['High bonding strength', 'Transparent when dry', 'Moisture resistant', 'Easy to apply'],
-                'specifications_ar' => ['الوزن: 250 مل', 'مدة الصلاحية: 18 شهر', 'درجة الحرارة: -5°C إلى +50°C'],
-                'specifications_en' => ['Weight: 250ml', 'Shelf life: 18 months', 'Temperature: -5°C to +50°C'],
-                'price' => 18.50,
+                'title_ar' => 'غراء سيراك الرمادي',
+                'title_en' => 'CERAC Gray Adhesive',
+                'description_ar' => 'غراء متخصص للاستخدامات الصناعية والتجارية',
+                'description_en' => 'Specialized adhesive for industrial and commercial applications',
+                'features_ar' => '["مقاوم للعوامل الجوية", "مناسب للاستخدام الخارجي", "متانة عالية", "مقاوم للتآكل", "قوة ضغط ممتازة"]',
+                'features_en' => '["Weather resistant", "Suitable for outdoor use", "High durability", "Corrosion resistant", "Excellent compressive strength"]',
                 'is_active' => true,
                 'sort_order' => 2,
             ],
             [
-                'name_ar' => 'غراء السيراميك',
-                'name_en' => 'Ceramic Adhesive',
-                'description_ar' => 'غراء قوي للسيراميك والبلاط، مقاوم للماء والحرارة',
-                'description_en' => 'Strong adhesive for ceramics and tiles, water and heat resistant',
-                'features_ar' => ['مقاوم للماء', 'مقاوم للحرارة', 'قوة تحمل عالية', 'لون أبيض'],
-                'features_en' => ['Water resistant', 'Heat resistant', 'High load capacity', 'White color'],
-                'specifications_ar' => ['الوزن: 1 كيلو', 'مدة الصلاحية: 12 شهر', 'درجة الحرارة: -15°C إلى +80°C'],
-                'specifications_en' => ['Weight: 1kg', 'Shelf life: 12 months', 'Temperature: -15°C to +80°C'],
-                'price' => 45.00,
+                'title_ar' => 'معجون سد الشقوق',
+                'title_en' => 'Crack Filling Paste',
+                'description_ar' => 'معجون مرن عالي الجودة لسد الشقوق والفواصل في الجدران والأسقف',
+                'description_en' => 'High-quality flexible paste for filling cracks and gaps in walls and ceilings',
+                'features_ar' => '["مرن ومقاوم للتشقق", "مقاوم للماء", "سهولة التشكيل", "لون أبيض نقي", "مقاوم للعفن والفطريات"]',
+                'features_en' => '["Flexible and crack resistant", "Water resistant", "Easy to shape", "Pure white color", "Mold and fungus resistant"]',
                 'is_active' => true,
                 'sort_order' => 3,
             ],
             [
-                'name_ar' => 'غراء المعادن',
-                'name_en' => 'Metal Adhesive',
-                'description_ar' => 'غراء متخصص للمعادن، يوفر لصق قوي ودائم',
-                'description_en' => 'Specialized metal adhesive that provides strong and durable bonding',
-                'features_ar' => ['قوة لصق استثنائية', 'مقاوم للتآكل', 'سريع الجفاف', 'متعدد الاستخدامات'],
-                'features_en' => ['Exceptional bonding strength', 'Corrosion resistant', 'Quick drying', 'Multi-purpose'],
-                'specifications_ar' => ['الوزن: 300 مل', 'مدة الصلاحية: 36 شهر', 'درجة الحرارة: -20°C إلى +120°C'],
-                'specifications_en' => ['Weight: 300ml', 'Shelf life: 36 months', 'Temperature: -20°C to +120°C'],
-                'price' => 35.00,
+                'title_ar' => 'ترويبة',
+                'title_en' => 'Trowel Mix',
+                'description_ar' => 'مادة لاصقة متخصصة للاستخدام مع المجرفة',
+                'description_en' => 'Specialized adhesive for use with trowel application',
+                'features_ar' => '["مناسب للتطبيق بالمجرفة", "قوام مناسب للعمل", "جفاف سريع", "قوة لصق عالية", "مقاوم للانزلاق"]',
+                'features_en' => '["Suitable for trowel application", "Workable consistency", "Fast drying", "High bonding strength", "Slip resistant"]',
                 'is_active' => true,
                 'sort_order' => 4,
             ],
             [
-                'name_ar' => 'غراء البلاستيك',
-                'name_en' => 'Plastic Adhesive',
-                'description_ar' => 'غراء مخصص للبلاستيك، يوفر لصق قوي ومرن',
-                'description_en' => 'Specialized plastic adhesive that provides strong and flexible bonding',
-                'features_ar' => ['مرن بعد الجفاف', 'مقاوم للمواد الكيميائية', 'شفاف', 'سهل التطبيق'],
-                'features_en' => ['Flexible when dry', 'Chemical resistant', 'Transparent', 'Easy to apply'],
-                'specifications_ar' => ['الوزن: 200 مل', 'مدة الصلاحية: 24 شهر', 'درجة الحرارة: -10°C إلى +70°C'],
-                'specifications_en' => ['Weight: 200ml', 'Shelf life: 24 months', 'Temperature: -10°C to +70°C'],
-                'price' => 22.00,
+                'title_ar' => 'سوبر سيراك',
+                'title_en' => 'Super CERAC',
+                'description_ar' => 'غراء فائق القوة للاستخدامات المتخصصة والصعبة',
+                'description_en' => 'Ultra-strength adhesive for specialized and demanding applications',
+                'features_ar' => '["قوة لصق فائقة", "مقاوم للعوامل القاسية", "مناسب للاستخدامات الصناعية", "متانة طويلة الأمد", "مقاوم للحرارة العالية"]',
+                'features_en' => '["Ultra bonding strength", "Resistant to harsh conditions", "Suitable for industrial use", "Long-term durability", "High temperature resistant"]',
                 'is_active' => true,
                 'sort_order' => 5,
             ],
             [
-                'name_ar' => 'غراء الألياف الزجاجية',
-                'name_en' => 'Fiberglass Adhesive',
-                'description_ar' => 'غراء متخصص للألياف الزجاجية والمواد المركبة',
-                'description_en' => 'Specialized adhesive for fiberglass and composite materials',
-                'features_ar' => ['قوة عالية', 'مقاوم للعوامل الجوية', 'دائم', 'متعدد الاستخدامات'],
-                'features_en' => ['High strength', 'Weather resistant', 'Durable', 'Multi-purpose'],
-                'specifications_ar' => ['الوزن: 500 مل', 'مدة الصلاحية: 18 شهر', 'درجة الحرارة: -30°C إلى +100°C'],
-                'specifications_en' => ['Weight: 500ml', 'Shelf life: 18 months', 'Temperature: -30°C to +100°C'],
-                'price' => 55.00,
+                'title_ar' => 'غالون سيراك',
+                'title_en' => 'CERAC Gallon',
+                'description_ar' => 'عبوة كبيرة الحجم للاستخدامات التجارية والصناعية',
+                'description_en' => 'Large volume container for commercial and industrial use',
+                'features_ar' => '["حجم اقتصادي", "مناسب للمشاريع الكبيرة", "توفير في التكلفة", "سهولة التخزين", "عبوة مقاومة"]',
+                'features_en' => '["Economical size", "Suitable for large projects", "Cost effective", "Easy storage", "Durable container"]',
                 'is_active' => true,
                 'sort_order' => 6,
             ],
@@ -95,5 +84,3 @@ class ProductSeeder extends Seeder
         }
     }
 }
-
-
