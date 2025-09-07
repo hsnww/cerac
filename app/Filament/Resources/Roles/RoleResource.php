@@ -24,6 +24,14 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static ?string $navigationLabel = 'الأدوار';
+
+    protected static ?string $modelLabel = 'دور';
+
+    protected static ?string $pluralModelLabel = 'الأدوار';
+
+    protected static ?int $navigationSort = 2;
+
     public static function form(Schema $schema): Schema
     {
         return RoleForm::configure($schema);

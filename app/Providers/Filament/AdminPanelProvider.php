@@ -54,6 +54,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->navigationGroups([
+                'إعدادات الموقع',
+                'إدارة الأقسام',
+                'إدارة المصادقة والأمان',
+                'إدارة المحتوى',
             ]);
     }
 }
