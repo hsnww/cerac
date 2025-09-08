@@ -10,12 +10,16 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use BackedEnum;
+use Filament\Support\Icons\Heroicon;
 
 class HomePageSettingResource extends Resource
 {
     protected static ?string $model = HomePageSetting::class;
 
     protected static ?string $navigationLabel = 'الصفحة الرئيسية';
+    protected static string|\UnitEnum|null $navigationGroup = 'اعدادات الموقع';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
     {
@@ -59,6 +63,14 @@ class HomePageSettingResource extends Resource
             'index' => Pages\ManageHomePageSetting::route('/'),
             'edit' => Pages\EditHomePageSetting::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationUrl(): string
+    {
+        $record = HomePageSetting::query()->first();
+        return $record
+            ? static::getUrl('edit', ['record' => $record])
+            : static::getUrl('index');
     }
 }
 

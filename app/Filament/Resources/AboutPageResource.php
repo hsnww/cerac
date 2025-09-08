@@ -31,6 +31,8 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Schemas\Schema;
+use BackedEnum;
+use Filament\Support\Icons\Heroicon;
 
 class AboutPageResource extends Resource
 {
@@ -39,6 +41,8 @@ class AboutPageResource extends Resource
     // navigation icon optional to avoid linter type issues
 
     protected static ?string $navigationLabel = 'من نحن';
+    protected static string|\UnitEnum|null $navigationGroup = 'اعدادات الموقع';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
     {
@@ -142,6 +146,14 @@ class AboutPageResource extends Resource
             'index' => Pages\ManageAboutPage::route('/'),
             'edit' => Pages\EditAboutPage::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationUrl(): string
+    {
+        $record = AboutPage::query()->first();
+        return $record
+            ? static::getUrl('edit', ['record' => $record])
+            : static::getUrl('index');
     }
 }
 

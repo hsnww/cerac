@@ -25,15 +25,15 @@ class SiteSettingResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'key';
 
-    protected static ?string $navigationLabel = 'إعدادات الموقع';
+    protected static ?string $navigationLabel = 'اعدادات الموقع';
 
     protected static ?string $modelLabel = 'إعداد الموقع';
 
-    protected static ?string $pluralModelLabel = 'إعدادات الموقع';
+    protected static ?string $pluralModelLabel = 'اعدادات الموقع';
 
     protected static ?int $navigationSort = 1;
 
-    protected static string|UnitEnum|null $navigationGroup = 'إعدادات الموقع';
+    protected static string|UnitEnum|null $navigationGroup = 'اعدادات الموقع';
 
     public static function form(Schema $schema): Schema
     {
@@ -65,5 +65,13 @@ class SiteSettingResource extends Resource
             'view' => ViewSiteSetting::route('/{record}'),
             'edit' => EditSiteSetting::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationUrl(): string
+    {
+        $record = SiteSetting::query()->first();
+        return $record
+            ? static::getUrl('edit', ['record' => $record])
+            : static::getUrl('index');
     }
 }
