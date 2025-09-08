@@ -3,8 +3,12 @@
 @section('title', $settings->site_name)
 
 @section('content')
-<!-- Hero Section -->
-@if($heroSlides->count() > 0)
+<!-- Sections Renderer -->
+@foreach($homeSections as $section)
+    @switch($section['key'])
+        @case('hero')
+            <!-- Hero Section -->
+            @if($heroSlides->count() > 0)
 <section id="home" class="relative">
     <div class="swiper hero-swiper">
         <div class="swiper-wrapper">
@@ -62,7 +66,7 @@
         <div class="swiper-button-prev"></div>
     </div>
 </section>
-@else
+            @else
 <!-- Fallback Hero Section -->
 <section id="home" class="relative h-[500px] bg-gradient-to-r from-blue-900 to-blue-700 flex items-center justify-center">
     <div class="text-center text-white px-4 max-w-4xl mx-auto">
@@ -74,7 +78,9 @@
         </a>
     </div>
 </section>
-@endif
+            @endif
+            @break
+        @case('cta')
 
 <!-- CTA Section -->
 <section id="cta" class="relative py-12" style="background-color: #1cabe3 !important;">
@@ -140,7 +146,8 @@
         </div>
     </div>
 </section>
-
+            @break
+        @case('products')
 
 <!-- Products Section -->
 <section id="products" class="py-16 bg-gray-50">
@@ -154,7 +161,9 @@
             @forelse($products->take(6) as $product)
             <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div class="w-full h-48 flex items-center justify-center bg-white">
-                    @if($product->image_url)
+                    @if($product->cover_image_url)
+                        <img src="{{ $product->cover_image_url }}" alt="{{ $product->name_ar }}" class="max-w-full max-h-full object-contain">
+                    @elseif($product->image_url)
                         <img src="{{ $product->image_url }}" alt="{{ $product->name_ar }}" class="max-w-full max-h-full object-contain">
                     @else
                         <div class="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -183,7 +192,9 @@
             <a href="{{ route('products.index') }}" class="btn-primary">عرض جميع المنتجات</a>
         </div>
     </div>
-</section>
+        </section>
+            @break
+        @case('partners')
 
 <!-- Partners Section -->
 <section id="partners" class="py-16 bg-white">
@@ -213,7 +224,9 @@
             @endforelse
         </div>
     </div>
-</section>
+        </section>
+            @break
+        @case('projects')
 
 <!-- Projects Section -->
 <section id="projects" class="py-16 bg-white">
@@ -257,7 +270,9 @@
             <a href="{{ route('projects.index') }}" class="btn-primary">عرض جميع المشاريع</a>
         </div>
     </div>
-</section>
+        </section>
+            @break
+        @case('clients')
 
 <!-- Clients Section -->
 <section id="clients" class="py-12 bg-gray-50">
@@ -292,7 +307,9 @@
             @endforelse
         </div>
     </div>
-</section>
+        </section>
+            @break
+        @case('contact')
 
 <!-- Contact Section -->
 <section id="contact" class="py-16 bg-gray-50">
@@ -359,7 +376,10 @@
             </div>
         </div>
     </div>
-</section>
+        </section>
+            @break
+    @endswitch
+@endforeach
 @endsection
 
 @push('styles')

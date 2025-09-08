@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Client;
 use App\Models\Partner;
 use App\Models\Project;
+use App\Models\HomePageSetting;
 
 class HomeController extends Controller
 {
@@ -21,13 +22,26 @@ class HomeController extends Controller
         $partners = Partner::active()->ordered()->get();
         $projects = Project::with('client')->active()->featured()->ordered()->take(6)->get();
 
+        $homeSettings = HomePageSetting::getSettings();
+        $homeSections = collect([
+            ['key' => 'hero', 'show' => $homeSettings->show_hero, 'order' => $homeSettings->order_hero],
+            ['key' => 'cta', 'show' => $homeSettings->show_cta, 'order' => $homeSettings->order_cta],
+            ['key' => 'products', 'show' => $homeSettings->show_products, 'order' => $homeSettings->order_products],
+            ['key' => 'partners', 'show' => $homeSettings->show_partners, 'order' => $homeSettings->order_partners],
+            ['key' => 'projects', 'show' => $homeSettings->show_projects, 'order' => $homeSettings->order_projects],
+            ['key' => 'clients', 'show' => $homeSettings->show_clients, 'order' => $homeSettings->order_clients],
+            ['key' => 'contact', 'show' => $homeSettings->show_contact_teaser, 'order' => $homeSettings->order_contact_teaser],
+        ])->where('show', true)->sortBy('order')->values();
+
         return view('home', compact(
             'settings',
             'heroSlides', 
             'products',
             'clients',
             'partners',
-            'projects'
+            'projects',
+            'homeSettings',
+            'homeSections'
         ));
     }
 }

@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             ProjectSeeder::class,
             HeroSlideSeeder::class,
             PopupSeeder::class,
+            AboutPageSeeder::class,
+            HomePageSettingSeeder::class,
             PermissionSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,

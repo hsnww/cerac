@@ -25,23 +25,31 @@ class ClientsTable
                         return $record->getFirstMediaUrl('logo');
                     }),
                 TextColumn::make('name_ar')
+                    ->label('الاسم (عربي)')
                     ->searchable(),
                 TextColumn::make('name_en')
+                    ->label('الاسم (إنجليزي)')
                     ->searchable(),
                 TextColumn::make('website_url')
+                    ->label('الموقع')
                     ->searchable(),
                 IconColumn::make('is_featured')
+                    ->label('مميز')
                     ->boolean(),
                 IconColumn::make('is_active')
+                    ->label('نشط')
                     ->boolean(),
                 TextColumn::make('sort_order')
+                    ->label('الترتيب')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('أُنشئ في')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('عُدّل في')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -50,12 +58,12 @@ class ClientsTable
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+                ViewAction::make()->label('عرض'),
+                EditAction::make()->label('تعديل'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('حذف المحدد'),
                 ]),
             ]);
     }

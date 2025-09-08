@@ -1,14 +1,16 @@
 @extends('layouts.app')
 
-@section('title', 'من نحن - ' . $settings->site_name)
+@section('title', 'من نحن - ' . ($settings->site_name ?? 'سيراك'))
 
 @section('content')
 
 <!-- Hero Section -->
-<section class="py-20" style="background-color: #1cabe3 !important;">
+<section class="py-20" style="background-color: {{ $about->hero_bg_color ?? '#1cabe3' }} !important;">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6" style="color: #0e183c;">من نحن</h1>
-        <p class="text-xl md:text-2xl mb-8" style="color: #0e183c;">مصنع مستقبل الغراء - رواد في مجال إنتاج الغراء والمواد اللاصقة</p>
+        <h1 class="text-4xl md:text-6xl font-bold mb-6" style="color: {{ $about->hero_text_color ?? '#0e183c' }};">{{ $about->hero_title ?? 'من نحن' }}</h1>
+        @if(!empty($about?->hero_subtitle))
+        <p class="text-xl md:text-2xl mb-8" style="color: {{ $about->hero_text_color ?? '#0e183c' }};">{{ $about->hero_subtitle }}</p>
+        @endif
     </div>
 </section>
 
@@ -18,16 +20,13 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <!-- Text Content -->
             <div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">مصنع مستقبل الغراء</h2>
-                <p class="text-lg text-gray-600 mb-6 leading-relaxed">
-                    نحن في سيراك نقدم حلولاً متكاملة في مجال مواد البناء والغراء عالية الجودة، 
-                    مع التزامنا بالابتكار والتميز في كل منتج نقدمه. تأسس مصنعنا على أسس قوية 
-                    من الخبرة والجودة لنكون شريككم الموثوق في مشاريعكم الإنشائية.
-                </p>
-                <p class="text-lg text-gray-600 mb-8 leading-relaxed">
-                    نسعى دائماً لتقديم أفضل المنتجات التي تلبي احتياجات السوق السعودي والعربي، 
-                    مع الحفاظ على أعلى معايير الجودة والسلامة في جميع مراحل الإنتاج والتوزيع.
-                </p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">{{ $about->about_title ?? 'من نحن' }}</h2>
+                @if(!empty($about?->about_paragraph_1))
+                <p class="text-lg text-gray-600 mb-6 leading-relaxed">{{ $about->about_paragraph_1 }}</p>
+                @endif
+                @if(!empty($about?->about_paragraph_2))
+                <p class="text-lg text-gray-600 mb-8 leading-relaxed">{{ $about->about_paragraph_2 }}</p>
+                @endif
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="flex items-center">
@@ -82,11 +81,14 @@
             
             <!-- Image -->
             <div class="relative">
-                <div class="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                </div>
+                @php $aboutImage = $about?->getFirstMediaUrl('about_main_image'); @endphp
+                @if($aboutImage)
+                    <img src="{{ $aboutImage }}" alt="about image" class="w-full h-96 object-cover rounded-lg" />
+                @else
+                    <div class="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -99,30 +101,23 @@
             <!-- Mission -->
             <div class="text-center">
                 <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">رؤيتنا</h3>
-                <p class="text-gray-600 leading-relaxed">
-                    أن نكون الرائدين في مجال إنتاج الغراء والمواد اللاصقة في المملكة العربية السعودية 
-                    والمنطقة، مع التزامنا بتقديم منتجات عالية الجودة تلبي احتياجات السوق المحلي والعربي.
-                </p>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ $about->mission_title ?? 'رؤيتنا' }}</h3>
+                @if(!empty($about?->mission_text))
+                <p class="text-gray-600 leading-relaxed">{{ $about->mission_text }}</p>
+                @endif
             </div>
             
             <!-- Vision -->
             <div class="text-center">
                 <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                    </svg>
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4">رسالتنا</h3>
-                <p class="text-gray-600 leading-relaxed">
-                    تقديم حلول متكاملة في مجال مواد البناء والغراء عالية الجودة، مع التركيز على 
-                    الابتكار والتميز في الخدمة، لضمان رضا عملائنا ونجاح مشاريعهم الإنشائية.
-                </p>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ $about->vision_title ?? 'رسالتنا' }}</h3>
+                @if(!empty($about?->vision_text))
+                <p class="text-gray-600 leading-relaxed">{{ $about->vision_text }}</p>
+                @endif
             </div>
         </div>
     </div>
@@ -131,13 +126,13 @@
 <!-- Contact CTA -->
 <section class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl font-bold text-gray-900 mb-6">هل تريد معرفة المزيد عنا؟</h2>
-        <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
-            تواصلوا معنا اليوم لمعرفة المزيد عن منتجاتنا وخدماتنا، ونحن سعداء لخدمتكم في جميع احتياجاتكم الإنشائية.
-        </p>
+        <h2 class="text-3xl font-bold text-gray-900 mb-6">{{ $about->cta_title ?? 'هل تريد معرفة المزيد عنا؟' }}</h2>
+        @if(!empty($about?->cta_text))
+        <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto">{{ $about->cta_text }}</p>
+        @endif
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{{ route('contact') }}" class="btn-primary">تواصل معنا</a>
-            <a href="{{ route('products.index') }}" class="btn-secondary">عرض منتجاتنا</a>
+            <a href="{{ $about->cta_primary_url ?? route('contact') }}" class="btn-primary">{{ $about->cta_primary_text ?? 'تواصل معنا' }}</a>
+            <a href="{{ $about->cta_secondary_url ?? route('products.index') }}" class="btn-secondary">{{ $about->cta_secondary_text ?? 'عرض منتجاتنا' }}</a>
         </div>
     </div>
 </section>

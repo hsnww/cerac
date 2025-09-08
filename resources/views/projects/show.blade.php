@@ -16,16 +16,33 @@
 <section class="py-20 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <!-- Project Image -->
-            <div class="w-full h-96 overflow-hidden rounded-lg shadow-lg">
-                @if($project->cover_image_url)
-                    <img src="{{ $project->cover_image_url }}" alt="{{ $project->title_ar }}" class="w-full h-full object-cover">
-                @else
-                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                        </svg>
+            <!-- Project Images -->
+            <div>
+                <!-- Cover Image -->
+                <div class="w-full h-96 overflow-hidden rounded-lg shadow-lg mb-6">
+                    @if($project->cover_image_url)
+                        <img src="{{ $project->cover_image_url }}" alt="{{ $project->title_ar }}" class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Gallery Images -->
+                @if($project->getMedia('gallery')->count() > 0)
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">معرض الصور</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        @foreach($project->getMedia('gallery') as $galleryImage)
+                        <div class="aspect-square bg-white rounded-lg shadow-md overflow-hidden">
+                            <img src="{{ $galleryImage->getUrl() }}" alt="{{ $project->title_ar }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer" onclick="openImageModal('{{ $galleryImage->getUrl() }}', '{{ $project->title_ar }}')">
+                        </div>
+                        @endforeach
                     </div>
+                </div>
                 @endif
             </div>
             
@@ -135,3 +152,39 @@
 </section>
 @endif
 @endsection
+
+@push('scripts')
+<script>
+function openImageModal(imageUrl, caption) {
+    let modal = document.getElementById('imageModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'imageModal';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="relative max-w-4xl max-h-full">
+                <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+                <p id="modalCaption" class="text-white text-center mt-4 text-lg"></p>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', function(e) { if (e.target === modal) closeImageModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeImageModal(); });
+    }
+    document.getElementById('modalImage').src = imageUrl;
+    document.getElementById('modalCaption').textContent = caption;
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+</script>
+@endpush

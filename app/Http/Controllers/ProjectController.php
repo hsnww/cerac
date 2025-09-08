@@ -21,7 +21,7 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         $settings = SiteSetting::getSettings();
-        $project->load('client');
+        $project->load('client', 'media');
         
         // Get related projects (same client)
         $relatedProjects = Project::with('client')

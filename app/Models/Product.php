@@ -41,14 +41,37 @@ class Product extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('product_image')
+        // الغلاف
+        $this->addMediaCollection('product_cover')
+            ->useDisk('public')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+        // المعرض
+        $this->addMediaCollection('product_gallery')
             ->useDisk('public')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+        // ملف المواصفات (PDF/Word)
+        $this->addMediaCollection('product_spec_document')
+            ->useDisk('public')
+            ->acceptsMimeTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
     }
 
     public function getImageUrlAttribute(): ?string
     {
-        return $this->getFirstMediaUrl('product_image');
+        return $this->getFirstMediaUrl('product_cover')
+            ?: $this->getFirstMediaUrl('product_gallery');
+    }
+
+    public function getCoverImageUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('product_cover');
+    }
+
+    public function getSpecDocumentUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('product_spec_document');
     }
 
     // Accessor for backward compatibility
