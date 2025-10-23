@@ -1,0 +1,434 @@
+# Popups Model - Complete Description
+# مودل النوافذ المنبثقة
+
+## Model Overview
+- **Model Name**: Popup
+- **Table Name**: popups
+- **Purpose**: Manages popup windows with various content types (images, videos, forms, surveys)
+- **File Location**: app/Models/Popup.php
+- **Features**: Multiple popup types, scheduling, session management, analytics
+
+## Database Structure (Migration)
+```php
+// Migration: 2025_01_07_000007_create_popups_table.php
+Schema::create('popups', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');                           // Popup title
+    $table->string('type')->default('poster');         // Popup type
+    $table->text('content')->nullable();               // HTML content
+    $table->string('image_url')->nullable();           // Direct image URL
+    $table->string('video_url')->nullable();           // Video file URL
+    $table->string('youtube_url')->nullable();         // YouTube video URL
+    $table->string('form_action')->nullable();         // Form submission URL
+    $table->json('form_fields')->nullable();           // Form fields configuration
+    $table->string('button_text')->default('إغلاق');   // Button text
+    $table->string('button_url')->nullable();          // Button action URL
+    $table->boolean('show_close_button')->default(true); // Show close button
+    $table->boolean('auto_close')->default(false);     // Auto close enabled
+    $table->integer('auto_close_delay')->nullable();   // Auto close delay in seconds
+    $table->boolean('show_once_per_session')->default(true); // Show once per session
+    $table->json('display_rules')->nullable();         // Display rules (pages, roles, etc.)
+    $table->integer('width')->default(800);            // Popup width
+    $table->integer('height')->default(600);           // Popup height
+    $table->string('position')->default('center');     // Popup position
+    $table->boolean('is_active')->default(false);      // Active status
+    $table->integer('sort_order')->default(0);         // Display order
+    $table->integer('display_count')->default(0);      // View count
+    $table->timestamp('starts_at')->nullable();        // Start date/time
+    $table->timestamp('ends_at')->nullable();          // End date/time
+    $table->timestamps();
+});
+```
+
+## Model Properties
+```php
+// Fillable attributes
+protected $fillable = [
+    'title', 'type', 'content', 'image_url', 'video_url', 'youtube_url',
+    'form_action', 'form_fields', 'button_text', 'button_url',
+    'show_close_button', 'auto_close', 'auto_close_delay', 'show_once_per_session',
+    'display_rules', 'width', 'height', 'position', 'is_active',
+    'sort_order', 'display_count', 'starts_at', 'ends_at'
+];
+
+// Casts
+protected $casts = [
+    'form_fields' => 'array',
+    'display_rules' => 'array',
+    'show_close_button' => 'boolean',
+    'auto_close' => 'boolean',
+    'show_once_per_session' => 'boolean',
+    'is_active' => 'boolean',
+    'starts_at' => 'datetime',
+    'ends_at' => 'datetime',
+];
+```
+
+## Model Methods & Scopes
+```php
+// Scopes
+public function scopeActive($query)
+{
+    return $query->where('is_active', true);
+}
+
+public function scopeCurrentlyActive($query)
+{
+    $now = Carbon::now();
+    return $query->where('is_active', true)
+        ->where(function ($q) use ($now) {
+            $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+        })
+        ->where(function ($q) use ($now) {
+            $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+        });
+}
+
+public function scopeOrdered($query)
+{
+    return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
+}
+
+// Methods
+public function incrementDisplayCount()
+{
+    $this->increment('display_count');
+}
+
+public function isCurrentlyActive()
+{
+    if (!$this->is_active) return false;
+    
+    $now = Carbon::now();
+    if ($this->starts_at && $this->starts_at->gt($now)) return false;
+    if ($this->ends_at && $this->ends_at->lt($now)) return false;
+    
+    return true;
+}
+
+public function getYoutubeEmbedUrl()
+{
+    if (!$this->youtube_url) return null;
+    
+    $pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/';
+    preg_match($pattern, $this->youtube_url, $matches);
+    
+    if (isset($matches[1])) {
+        return 'https://www.youtube.com/embed/' . $matches[1];
+    }
+    
+    return null;
+}
+```
+
+## Media Library Integration
+```php
+// Uses Spatie Media Library
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+// Media collection configuration
+public function registerMediaCollections(): void
+{
+    $this->addMediaCollection('popup_images')
+        ->useDisk('public')
+        ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+}
+
+// Accessors
+public function getImageUrlAttribute(): ?string
+{
+    $mediaUrl = $this->getFirstMediaUrl('popup_images');
+    if ($mediaUrl) return $mediaUrl;
+    return $this->attributes['image_url'] ?? null;
+}
+
+public function getMediaUrlAttribute(): ?string
+{
+    return $this->getFirstMediaUrl('popup_images');
+}
+
+public function getMediaUrlsAttribute(): array
+{
+    return $this->getMedia('popup_images')->map(fn($media) => $media->getUrl())->toArray();
+}
+```
+
+## Model Events (Boot Method)
+```php
+protected static function boot()
+{
+    parent::boot();
+
+    // When a popup is activated, deactivate all others
+    static::updating(function ($popup) {
+        if ($popup->isDirty('is_active') && $popup->is_active) {
+            static::where('id', '!=', $popup->id)->update(['is_active' => false]);
+        }
+    });
+
+    // When a new popup is created and activated, deactivate all others
+    static::creating(function ($popup) {
+        if ($popup->is_active) {
+            static::where('id', '!=', $popup->id)->update(['is_active' => false]);
+        }
+    });
+}
+```
+
+## Popup Types
+1. **poster** - Image-based popup with overlay text
+2. **video** - Video file popup
+3. **youtube** - YouTube video embed popup
+4. **form** - Contact form popup
+5. **survey** - Survey/feedback form popup
+6. **custom** - Custom HTML content popup
+
+## Filament Resource Configuration
+- **Resource File**: app/Filament/Resources/Popups/PopupResource.php
+- **Navigation Label**: 'النوافذ المنبثقة'
+- **Model Label**: 'نافذة منبثقة'
+- **Navigation Group**: 'إدارة المحتوى'
+- **Navigation Sort**: 1
+- **Icon**: Heroicon::OutlinedRectangleStack
+
+### Form Schema (PopupForm.php)
+```php
+// Form components
+- TextInput::make('title')->label('العنوان')->required()
+- Select::make('type')->label('نوع النافذة')
+  ->options([
+      'poster' => 'بوستر',
+      'video' => 'فيديو', 
+      'youtube' => 'يوتيوب',
+      'form' => 'نموذج',
+      'survey' => 'استطلاع',
+      'custom' => 'مخصص'
+  ])
+- Textarea::make('content')->label('المحتوى')->columnSpanFull()
+- SpatieMediaLibraryFileUpload::make('popup_images')
+  ->label('صور النافذة المنبثقة')
+  ->collection('popup_images')
+  ->multiple()
+  ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+- TextInput::make('video_url')->label('رابط الفيديو')
+- TextInput::make('youtube_url')->label('رابط يوتيوب')
+- TextInput::make('form_action')->label('مسار النموذج')
+- TextInput::make('form_fields')->label('حقول النموذج')
+- TextInput::make('button_text')->label('نص الزر')->default('إغلاق')
+- TextInput::make('button_url')->label('رابط الزر')
+- Toggle::make('show_close_button')->label('إظهار زر الإغلاق')
+- Toggle::make('auto_close')->label('إغلاق تلقائي')
+- TextInput::make('auto_close_delay')->label('مدة الإغلاق التلقائي (ثواني)')
+- Toggle::make('show_once_per_session')->label('إظهار مرة واحدة لكل جلسة')
+- TextInput::make('display_rules')->label('قواعد العرض')
+- TextInput::make('width')->label('العرض (بكسل)')->default(800)
+- TextInput::make('height')->label('الارتفاع (بكسل)')->default(600)
+- Select::make('position')->label('الموضع')
+  ->options(['center' => 'وسط', 'top' => 'أعلى', 'bottom' => 'أسفل', 'left' => 'يسار', 'right' => 'يمين'])
+- Toggle::make('is_active')->label('نشط')
+  ->helperText('عند تفعيل هذه النافذة، سيتم تعطيل جميع النوافذ الأخرى تلقائياً')
+- TextInput::make('sort_order')->label('ترتيب العرض')->default(0)
+- TextInput::make('display_count')->label('عدد المشاهدات')->default(0)
+- DateTimePicker::make('starts_at')->label('تاريخ البداية')
+- DateTimePicker::make('ends_at')->label('تاريخ النهاية')
+```
+
+### Resource Pages
+- **List Page**: ListPopups.php
+- **Create Page**: CreatePopup.php
+- **Edit Page**: EditPopup.php
+- **View Page**: ViewPopup.php
+
+## Controller Usage
+```php
+// File: app/Http/Controllers/PopupController.php
+
+// Get active popups for frontend
+public function getActivePopups()
+{
+    $popups = Popup::currentlyActive()->ordered()->get()
+        ->map(function ($popup) {
+            return [
+                'id' => $popup->id,
+                'title' => $popup->title,
+                'type' => $popup->type,
+                'content' => $popup->content,
+                'image_url' => $popup->getFirstMediaUrl('popup_images') ?: $popup->image_url,
+                'popup_images' => $popup->getMedia('popup_images')->map(fn($media) => [
+                    'url' => $media->getUrl(),
+                    'name' => $media->name,
+                ]),
+                'video_url' => $popup->video_url,
+                'youtube_url' => $popup->youtube_url,
+                'form_action' => $popup->form_action,
+                'form_fields' => $popup->form_fields,
+                'button_text' => $popup->button_text,
+                'button_url' => $popup->button_url,
+                'show_close_button' => $popup->show_close_button,
+                'auto_close' => $popup->auto_close,
+                'auto_close_delay' => $popup->auto_close_delay,
+                'show_once_per_session' => $popup->show_once_per_session,
+                'display_rules' => $popup->display_rules,
+                'width' => $popup->width,
+                'height' => $popup->height,
+                'position' => $popup->position,
+                'is_active' => $popup->is_active,
+                'starts_at' => $popup->starts_at,
+                'ends_at' => $popup->ends_at,
+            ];
+        });
+    
+    return response()->json($popups);
+}
+
+// Increment display count
+public function incrementDisplayCount(Popup $popup)
+{
+    $popup->incrementDisplayCount();
+    return response()->json(['success' => true]);
+}
+```
+
+## JavaScript Requirements
+**File**: public/js/popup-manager.js
+
+### Key Features:
+- **PopupManager Class** - Main popup management system
+- **Multiple Popup Types** - Renders different content based on type
+- **Session Management** - Tracks shown popups per session
+- **Responsive Design** - Mobile-friendly popup sizing
+- **Auto-close** - Automatic popup closing with delay
+- **Form Handling** - Built-in form submission support
+- **YouTube Integration** - Automatic YouTube URL conversion to embed
+- **Analytics** - Display count tracking
+
+### Main Methods:
+```javascript
+class PopupManager {
+    constructor()                    // Initialize popup system
+    init()                          // Setup container and events
+    loadPopups()                    // Fetch active popups from API
+    showNextPopup()                 // Display next available popup
+    shouldShowPopup(popup)          // Check if popup should be shown
+    showPopup(popupData)            // Display specific popup
+    renderPopupContent(popupData)   // Render content based on type
+    renderPosterPopup(popupData)    // Render image-based popup
+    renderVideoPopup(popupData)     // Render video popup
+    renderYouTubePopup(popupData)   // Render YouTube popup
+    renderFormPopup(popupData)      // Render form popup
+    renderCustomPopup(popupData)    // Render custom HTML popup
+    hidePopup()                     // Hide current popup
+    handleButtonClick(url)          // Handle button actions
+    incrementDisplayCount(popupId)  // Track popup views
+    bindEvents()                    // Setup event listeners
+}
+```
+
+## Required Packages
+1. **Spatie Media Library** (spatie/laravel-medialibrary)
+   - For image upload and management
+   - Collection: 'popup_images'
+   - Disk: 'public'
+   - Accepted types: jpeg, png, webp, gif
+
+2. **Filament** (filament/filament)
+   - For admin panel interface
+   - Version: 4.x compatible
+
+3. **Carbon** (nesbot/carbon)
+   - For date/time handling
+   - Built into Laravel
+
+## Additional Files Structure
+```
+app/Models/Popup.php
+app/Http/Controllers/PopupController.php
+app/Filament/Resources/Popups/
+├── PopupResource.php
+├── Pages/
+│   ├── ListPopups.php
+│   ├── CreatePopup.php
+│   ├── EditPopup.php
+│   └── ViewPopup.php
+├── Schemas/
+│   ├── PopupForm.php
+│   └── PopupInfolist.php
+└── Tables/
+    └── PopupsTable.php
+
+public/js/popup-manager.js
+resources/views/components/popup.blade.php
+
+database/
+├── migrations/2025_01_07_000007_create_popups_table.php
+└── seeders/PopupSeeder.php
+```
+
+## Routes Configuration
+```php
+// In routes/web.php
+Route::get('/popups/active', [PopupController::class, 'getActivePopups']);
+Route::post('/popups/{popup}/increment', [PopupController::class, 'incrementDisplayCount']);
+Route::get('/popups/test', [PopupController::class, 'createTestPopup']);
+Route::get('/popups/activate', [PopupController::class, 'activatePopup']);
+Route::get('/popups/activate-video', [PopupController::class, 'activateVideoPopup']);
+Route::get('/popups/test-all', [PopupController::class, 'testAllPopups']);
+Route::get('/popups/check', [PopupController::class, 'checkActivePopups']);
+```
+
+## Seeder Configuration
+```php
+// File: database/seeders/PopupSeeder.php
+// Creates 6 sample popups with different types:
+// 1. Poster popup with image
+// 2. YouTube video popup
+// 3. Contact form popup
+// 4. Survey popup
+// 5. Custom HTML popup with special offer
+// 6. Another poster popup
+```
+
+## Implementation Notes
+1. **Singleton Behavior**: Only one popup can be active at a time
+2. **Scheduling**: Popups can have start/end dates
+3. **Session Management**: Track shown popups per browser session
+4. **Analytics**: Display count tracking for each popup
+5. **Responsive**: Mobile-friendly popup sizing
+6. **Multiple Media**: Support for both direct URLs and Spatie Media Library
+7. **Form Integration**: Built-in form handling with custom fields
+8. **YouTube Support**: Automatic URL conversion to embed format
+9. **Auto-close**: Optional automatic closing with delay
+10. **Custom Content**: Support for custom HTML content
+
+## Usage in Views
+```php
+// Include popup manager in layout
+<script src="{{ asset('js/popup-manager.js') }}"></script>
+
+// Popup manager automatically loads and displays active popups
+// No additional code needed in templates
+```
+
+## Database Seeder Sample Data
+The seeder creates 6 sample popups:
+1. **Welcome Poster** - Image with call-to-action
+2. **YouTube Video** - Product demonstration video
+3. **Contact Form** - Lead generation form
+4. **Customer Survey** - Feedback collection
+5. **Special Offer** - Custom HTML with discount code
+6. **Additional Poster** - Another promotional image
+
+Each popup includes proper configuration for its type, scheduling, and display settings.
+
+## Key Features
+- **Multi-type Support**: 6 different popup types
+- **Advanced Scheduling**: Start/end date control
+- **Session Management**: Show once per session option
+- **Analytics Tracking**: View count and display statistics
+- **Responsive Design**: Mobile-optimized popup sizing
+- **Media Integration**: Both direct URLs and Spatie Media Library
+- **Form Handling**: Custom form fields and submission
+- **YouTube Integration**: Automatic embed URL generation
+- **Auto-close**: Optional automatic closing
+- **Admin Interface**: Full CRUD operations via Filament

@@ -1,0 +1,415 @@
+# Projects Model - Complete Description
+# مودل الأعمال/المشاريع
+
+## Model Overview
+- **Model Name**: Project
+- **Table Name**: projects
+- **Purpose**: Manages construction projects with client relationships, media galleries, and location data
+- **File Location**: app/Models/Project.php
+- **Features**: Bilingual support, media management, client relationships, location mapping, featured projects
+
+## Database Structure (Migration)
+```php
+// Migration: 2025_01_07_000005_create_projects_table.php
+Schema::create('projects', function (Blueprint $table) {
+    $table->id();
+    $table->string('title_ar');                    // Arabic title
+    $table->string('title_en')->nullable();        // English title
+    $table->text('description_ar')->nullable();    // Arabic description
+    $table->text('description_en')->nullable();    // English description
+    $table->string('video_url')->nullable();       // Project video URL
+    $table->string('location_text')->nullable();   // Location text description
+    $table->decimal('latitude', 10, 7)->nullable(); // GPS latitude
+    $table->decimal('longitude', 10, 7)->nullable(); // GPS longitude
+    $table->unsignedBigInteger('client_id')->nullable(); // Foreign key to clients
+    $table->boolean('is_featured')->default(false); // Featured project
+    $table->boolean('is_active')->default(true);    // Active status
+    $table->integer('sort_order')->default(0);      // Display order
+    $table->timestamps();
+});
+```
+
+## Model Properties
+```php
+// Fillable attributes
+protected $fillable = [
+    'title_ar', 'title_en', 'description_ar', 'description_en',
+    'video_url', 'location_text', 'latitude', 'longitude',
+    'client_id', 'is_featured', 'is_active', 'sort_order'
+];
+
+// Casts
+protected $casts = [
+    'is_featured' => 'boolean',
+    'is_active' => 'boolean',
+    'latitude' => 'decimal:7',
+    'longitude' => 'decimal:7',
+];
+```
+
+## Model Methods & Scopes
+```php
+// Scopes
+public function scopeActive($query)
+{
+    return $query->where('is_active', true);
+}
+
+public function scopeFeatured($query)
+{
+    return $query->where('is_featured', true);
+}
+
+public function scopeOrdered($query)
+{
+    return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
+}
+
+// Relationships
+public function client()
+{
+    return $this->belongsTo(Client::class);
+}
+
+// Accessors
+public function getCoverImageUrlAttribute(): ?string
+{
+    return $this->getFirstMediaUrl('cover_image');
+}
+
+public function getGalleryImagesAttribute()
+{
+    return $this->getMedia('gallery');
+}
+
+// Backward compatibility accessors
+public function getLocationArAttribute()
+{
+    return $this->location_text;
+}
+
+public function getLocationEnAttribute()
+{
+    return $this->location_text;
+}
+```
+
+## Media Library Integration
+```php
+// Uses Spatie Media Library
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+// Media collections configuration
+public function registerMediaCollections(): void
+{
+    // Cover image (single file)
+    $this->addMediaCollection('cover_image')
+        ->useDisk('public')
+        ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+        
+    // Gallery images (multiple files)
+    $this->addMediaCollection('gallery')
+        ->useDisk('public')
+        ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+}
+```
+
+## Relationships
+```php
+// Belongs to Client
+public function client()
+{
+    return $this->belongsTo(Client::class);
+}
+
+// Usage in Client model
+public function projects()
+{
+    return $this->hasMany(Project::class);
+}
+```
+
+## Filament Resource Configuration
+- **Resource File**: app/Filament/Resources/Projects/ProjectResource.php
+- **Navigation Label**: 'الأعمال'
+- **Model Label**: 'عمل'
+- **Navigation Group**: 'إدارة الأقسام'
+- **Navigation Sort**: 4
+- **Icon**: Heroicon::OutlinedRectangleStack
+
+### Form Schema (ProjectForm.php)
+```php
+// Form components
+- TextInput::make('title_ar')->label('عنوان العمل (عربي)')->required()
+- TextInput::make('title_en')->label('عنوان العمل (إنجليزي)')
+- Textarea::make('description_ar')->label('وصف العمل (عربي)')->columnSpanFull()
+- Textarea::make('description_en')->label('وصف العمل (إنجليزي)')->columnSpanFull()
+- TextInput::make('video_url')->label('رابط الفيديو')
+- TextInput::make('location_text')->label('الموقع')
+  ->placeholder('المدينة، الدولة')
+- TextInput::make('latitude')->label('خط العرض')->numeric()
+- TextInput::make('longitude')->label('خط الطول')->numeric()
+- TextInput::make('client_id')->label('العميل (ID)')->numeric()
+- Toggle::make('is_featured')->label('مميز')->required()
+- Toggle::make('is_active')->label('نشط')->required()
+- TextInput::make('sort_order')->label('ترتيب العرض')
+  ->numeric()->default(0)
+
+// Media uploads
+- SpatieMediaLibraryFileUpload::make('cover_image')
+  ->label('صورة الغلاف')
+  ->collection('cover_image')
+  ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+  ->maxSize(2048)
+  ->columnSpanFull()
+
+- SpatieMediaLibraryFileUpload::make('gallery')
+  ->label('معرض الصور')
+  ->collection('gallery')
+  ->multiple()
+  ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+  ->maxSize(2048)
+  ->columnSpanFull()
+```
+
+### Resource Pages
+- **List Page**: ListProjects.php
+- **Create Page**: CreateProject.php
+- **Edit Page**: EditProject.php
+- **View Page**: ViewProject.php
+
+## Controller Usage
+```php
+// File: app/Http/Controllers/ProjectController.php
+
+// Projects index page
+public function index()
+{
+    $settings = SiteSetting::getSettings();
+    $featuredProjects = Project::with('client')->active()->featured()->ordered()->get();
+    $allProjects = Project::with('client')->active()->ordered()->paginate(12);
+    
+    return view('projects.index', compact('featuredProjects', 'allProjects', 'settings'));
+}
+
+// Single project page
+public function show(Project $project)
+{
+    $settings = SiteSetting::getSettings();
+    $project->load('client', 'media');
+    
+    // Get related projects (same client)
+    $relatedProjects = Project::with('client')
+        ->active()
+        ->where('id', '!=', $project->id)
+        ->where('client_id', $project->client_id)
+        ->ordered()
+        ->take(3)
+        ->get();
+
+    return view('projects.show', compact('project', 'relatedProjects', 'settings'));
+}
+```
+
+## Frontend Views
+
+### Projects Index (projects/index.blade.php)
+```php
+// Features:
+- Hero section with site branding
+- Grid layout for projects (responsive 1/2/3 columns)
+- Project cards with cover images
+- Project titles and descriptions
+- Client information display
+- Location and completion date
+- "View Details" buttons
+- Empty state handling
+- Pagination support
+- Responsive design
+```
+
+### Project Details (projects/show.blade.php)
+```php
+// Features:
+- Hero section with project title
+- Two-column layout (images + details)
+- Cover image display
+- Image gallery with modal
+- Project description
+- Client information
+- Location details
+- Project metadata (completion date, budget, etc.)
+- Challenges and solutions sections
+- Results section
+- Related projects section
+- Image modal with navigation
+- Responsive design
+- Call-to-action buttons
+```
+
+## JavaScript Requirements
+**File**: Embedded in project show view
+
+### Image Modal Functionality:
+```javascript
+function openImageModal(imageUrl, caption) {
+    // Create modal if it doesn't exist
+    // Display image in modal
+    // Set caption
+    // Show modal
+    // Disable body scroll
+    // Add event listeners
+}
+
+function closeImageModal() {
+    // Hide modal
+    // Enable body scroll
+}
+
+// Event listeners:
+// - Click outside modal to close
+// - Escape key to close
+// - Gallery image clicks
+```
+
+## Required Packages
+1. **Spatie Media Library** (spatie/laravel-medialibrary)
+   - For image management
+   - Collections: 'cover_image', 'gallery'
+   - Disk: 'public'
+   - Image types: jpeg, png, webp, gif
+
+2. **Filament** (filament/filament)
+   - For admin panel interface
+   - Version: 4.x compatible
+
+## Additional Files Structure
+```
+app/Models/Project.php
+app/Http/Controllers/ProjectController.php
+app/Filament/Resources/Projects/
+├── ProjectResource.php
+├── Pages/
+│   ├── ListProjects.php
+│   ├── CreateProject.php
+│   ├── EditProject.php
+│   └── ViewProject.php
+├── Schemas/
+│   ├── ProjectForm.php
+│   └── ProjectInfolist.php
+└── Tables/
+    └── ProjectsTable.php
+
+resources/views/projects/
+├── index.blade.php
+└── show.blade.php
+
+database/
+├── migrations/2025_01_07_000005_create_projects_table.php
+└── seeders/ProjectSeeder.php
+```
+
+## Routes Configuration
+```php
+// In routes/web.php
+Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+```
+
+## Seeder Configuration
+```php
+// File: database/seeders/ProjectSeeder.php
+// Creates 5 sample projects:
+// 1. مشروع المجمع السكني الحديث - Modern Residential Complex Project
+// 2. مركز الأعمال التجاري - Business Center
+// 3. المستشفى التخصصي الجديد - New Specialized Hospital
+// 4. المجمع التعليمي المتكامل - Integrated Educational Complex
+// 5. المنطقة الصناعية المتطورة - Advanced Industrial Zone
+
+// Each project includes:
+// - Arabic and English titles and descriptions
+// - Video URLs
+// - Location text and GPS coordinates
+// - Client relationships
+// - Featured status (all set to true)
+// - Active status (all set to true)
+// - Sort order
+```
+
+## Implementation Notes
+1. **Multilingual Support**: Full Arabic/English content support
+2. **Media Management**: Two media collections (cover + gallery)
+3. **Client Integration**: Belongs to client relationship
+4. **Location Support**: Text and GPS coordinates
+5. **Featured Projects**: Special highlighting system
+6. **Image Gallery**: Modal-based image viewing
+7. **Related Projects**: Same client projects
+8. **Responsive Design**: Mobile-friendly layouts
+9. **SEO Friendly**: Proper meta titles and descriptions
+10. **Admin Interface**: Full CRUD operations via Filament
+
+## Usage in Views
+```php
+// Project listing
+@foreach($projects as $project)
+    <div class="project-card">
+        <img src="{{ $project->cover_image_url }}" alt="{{ $project->title_ar }}">
+        <h3>{{ $project->title_ar }}</h3>
+        <p>{{ $project->description_ar }}</p>
+        @if($project->client)
+            <p>العميل: {{ $project->client->name_ar }}</p>
+        @endif
+        <a href="{{ route('projects.show', $project) }}">View Details</a>
+    </div>
+@endforeach
+
+// Project details
+<h1>{{ $project->title_ar }}</h1>
+<p>{{ $project->description_ar }}</p>
+@if($project->client)
+    <p>العميل: {{ $project->client->name_ar }}</p>
+@endif
+@if($project->location_text)
+    <p>الموقع: {{ $project->location_text }}</p>
+@endif
+
+// Gallery images
+@foreach($project->getMedia('gallery') as $image)
+    <img src="{{ $image->getUrl() }}" alt="{{ $project->title_ar }}">
+@endforeach
+```
+
+## Database Seeder Sample Data
+The seeder creates 5 sample projects with:
+- **Bilingual Content**: Arabic and English titles and descriptions
+- **Location Data**: Saudi Arabian cities with GPS coordinates
+- **Client Relationships**: Linked to existing clients
+- **Video URLs**: YouTube video links
+- **Featured Status**: All projects set as featured
+- **Active Status**: All projects set as active
+- **Proper Ordering**: Sort order from 1-5
+
+## Key Features
+- **Multilingual**: Complete Arabic/English support
+- **Media Rich**: Cover images and galleries
+- **Client Integration**: Direct relationship with clients
+- **Location Mapping**: GPS coordinates and text descriptions
+- **Featured System**: Highlight important projects
+- **Image Gallery**: Modal-based image viewing
+- **Related Projects**: Automatic project suggestions
+- **Responsive Design**: Mobile-optimized layouts
+- **SEO Optimized**: Proper meta data and structure
+- **Performance**: Optimized queries with relationships
+
+## Frontend Display Features
+- **Grid Layout**: Responsive 1/2/3 column grid
+- **Image Display**: High-quality image rendering
+- **Hover Effects**: Smooth shadow transitions
+- **Image Modal**: Full-screen image viewing
+- **Client Info**: Integrated client information
+- **Location Data**: GPS and text location display
+- **Related Projects**: Same client project suggestions
+- **Mobile Optimized**: Touch-friendly project cards
+- **Loading States**: Smooth image loading
+- **Accessibility**: Proper alt text and labels

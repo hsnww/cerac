@@ -5,11 +5,11 @@
             <div class="col-span-1 md:col-span-2">
                 <div class="flex items-center mb-4">
                     @if($settings->logo_light_url ?? false)
-                        <img src="{{ $settings->logo_light_url }}" alt="Logo" class="h-16 w-auto ml-4" style="filter: brightness(0) invert(1);">
+                        <img src="{{ $settings->logo_light_url }}" alt="Logo" class="h-8 sm:h-10 md:h-12 lg:h-16 w-auto ml-4" style="filter: brightness(0) invert(1);">
                     @endif
                     <div>
-                        <h3 class="text-xl font-bold">{{ $settings->site_name ?? 'سيراك' }}</h3>
-                        <p class="text-gray-400">{{ $settings->site_description ?? 'مصنع مستقبل الغراء' }}</p>
+                        <h3 class="text-lg sm:text-xl font-bold">{{ $settings->site_name ?? 'سيراك' }}</h3>
+                        <p class="text-sm sm:text-base text-gray-400">{{ $settings->site_description ?? 'مصنع مستقبل الغراء' }}</p>
                     </div>
                 </div>
                 <p class="text-gray-400 mb-4">{{ $settings->about_text ?? 'رواد مجال إنتاج الغراء والمواد اللاصقة عالية الجودة للبناء والتشييد.' }}</p>

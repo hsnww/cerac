@@ -1,0 +1,290 @@
+# Partners Model - Complete Description
+# مودل الشركاء
+
+## Model Overview
+- **Model Name**: Partner
+- **Table Name**: partners
+- **Purpose**: Manages business partners with contact information and logos
+- **File Location**: app/Models/Partner.php
+- **Features**: Bilingual support, logo management, contact details, featured partners
+
+## Database Structure (Migration)
+```php
+// Migration: 2025_01_07_000003_create_partners_table.php
+Schema::create('partners', function (Blueprint $table) {
+    $table->id();
+    $table->string('name_ar');                    // Arabic name
+    $table->string('name_en')->nullable();        // English name
+    $table->text('description_ar')->nullable();   // Arabic description
+    $table->text('description_en')->nullable();   // English description
+    $table->string('website_url')->nullable();    // Website URL
+    $table->string('contact_email')->nullable();  // Contact email
+    $table->string('contact_phone')->nullable();  // Contact phone
+    $table->string('contact_person')->nullable(); // Contact person name
+    $table->string('contact_person_ar')->nullable(); // Contact person name (Arabic)
+    $table->string('partnership_type')->nullable(); // Partnership type
+    $table->string('partnership_type_ar')->nullable(); // Partnership type (Arabic)
+    $table->date('partnership_start_date')->nullable(); // Partnership start date
+    $table->date('partnership_end_date')->nullable();   // Partnership end date
+    $table->boolean('is_featured')->default(false);     // Featured partner
+    $table->boolean('is_active')->default(true);        // Active status
+    $table->integer('sort_order')->default(0);          // Display order
+    $table->timestamps();
+});
+```
+
+## Model Properties
+```php
+// Fillable attributes (Note: Model only includes basic fields)
+protected $fillable = [
+    'name_ar', 'name_en', 'website_url', 'contact_phone',
+    'contact_email', 'is_featured', 'is_active', 'sort_order'
+];
+
+// Casts
+protected $casts = [
+    'is_featured' => 'boolean',
+    'is_active' => 'boolean',
+];
+```
+
+## Model Methods & Scopes
+```php
+// Scopes
+public function scopeActive($query)
+{
+    return $query->where('is_active', true);
+}
+
+public function scopeOrdered($query)
+{
+    return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
+}
+
+// Accessors
+public function getLogoUrlAttribute(): ?string
+{
+    return $this->getFirstMediaUrl('logo');
+}
+
+// Backward compatibility accessors
+public function getNameArAttribute()
+{
+    return $this->attributes['name_ar'];
+}
+
+public function getNameEnAttribute()
+{
+    return $this->attributes['name_en'];
+}
+```
+
+## Media Library Integration
+```php
+// Uses Spatie Media Library
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+// Media collection configuration
+public function registerMediaCollections(): void
+{
+    $this->addMediaCollection('logo')
+        ->useDisk('public')
+        ->acceptsMimeTypes([
+            'image/jpeg', 'image/png', 'image/webp', 
+            'image/gif', 'image/svg+xml'
+        ]);
+}
+```
+
+## Filament Resource Configuration
+- **Resource File**: app/Filament/Resources/Partners/PartnerResource.php
+- **Navigation Label**: 'الشركاء'
+- **Model Label**: 'شريك'
+- **Navigation Group**: 'إدارة الأقسام'
+- **Navigation Sort**: 2
+- **Icon**: Heroicon::OutlinedRectangleStack
+
+### Form Schema (PartnerForm.php)
+```php
+// Form components
+- TextInput::make('name_ar')->label('اسم الشريك (عربي)')->required()
+- TextInput::make('name_en')->label('اسم الشريك (إنجليزي)')
+- TextInput::make('website_url')->label('رابط الموقع')
+  ->placeholder('https://example.com')
+- TextInput::make('contact_phone')->label('هاتف التواصل')
+  ->placeholder('05xxxxxxxx')->tel()
+- TextInput::make('contact_email')->label('بريد التواصل')
+  ->placeholder('name@example.com')->email()
+- Toggle::make('is_featured')->label('مميز')->required()
+- Toggle::make('is_active')->label('نشط')->required()
+- TextInput::make('sort_order')->label('ترتيب العرض')
+  ->numeric()->default(0)
+- SpatieMediaLibraryFileUpload::make('logo')
+  ->label('شعار الشريك')
+  ->collection('logo')
+  ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'])
+  ->maxSize(2048)
+  ->columnSpanFull()
+```
+
+### Resource Pages
+- **List Page**: ListPartners.php
+- **Create Page**: CreatePartner.php
+- **Edit Page**: EditPartner.php
+- **View Page**: ViewPartner.php
+
+## Controller Usage
+```php
+// In HomeController.php
+public function index()
+{
+    $partners = Partner::active()->ordered()->get();
+    return view('home', compact('partners'));
+}
+```
+
+## Frontend Usage
+```php
+// In home.blade.php - Partners section
+@if($partners->count() > 0)
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">شركاؤنا</h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+            @foreach($partners as $partner)
+            <div class="flex items-center justify-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                @if($partner->logo_url)
+                    <img src="{{ $partner->logo_url }}" 
+                         alt="{{ $partner->name_ar }}" 
+                         class="max-h-16 max-w-full object-contain">
+                @else
+                    <div class="text-center">
+                        <h3 class="text-sm font-medium text-gray-900">{{ $partner->name_ar }}</h3>
+                    </div>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+```
+
+## Required Packages
+1. **Spatie Media Library** (spatie/laravel-medialibrary)
+   - For logo image management
+   - Collection: 'logo'
+   - Disk: 'public'
+   - Accepted types: jpeg, png, webp, gif, svg
+
+2. **Filament** (filament/filament)
+   - For admin panel interface
+   - Version: 4.x compatible
+
+## Additional Files Structure
+```
+app/Models/Partner.php
+app/Filament/Resources/Partners/
+├── PartnerResource.php
+├── Pages/
+│   ├── ListPartners.php
+│   ├── CreatePartner.php
+│   ├── EditPartner.php
+│   └── ViewPartner.php
+├── Schemas/
+│   ├── PartnerForm.php
+│   └── PartnerInfolist.php
+└── Tables/
+    └── PartnersTable.php
+
+database/
+├── migrations/2025_01_07_000003_create_partners_table.php
+└── seeders/PartnerSeeder.php
+```
+
+## Seeder Configuration
+```php
+// File: database/seeders/PartnerSeeder.php
+// Creates 5 sample partners:
+// 1. شركة التوزيع المتخصصة - Specialized Distribution Co.
+// 2. مؤسسة التسويق الذكي - Smart Marketing Est.
+// 3. شركة الخدمات اللوجستية - Logistics Services Co.
+// 4. مجموعة الموردين المحليين - Local Suppliers Group
+// 5. شركة التطوير التقني - Technical Development Co.
+
+// Each partner includes:
+// - Arabic and English names
+// - Website URLs
+// - Contact phone numbers
+// - Contact email addresses
+// - Featured status (all set to true)
+// - Active status (all set to true)
+// - Sort order
+```
+
+## Implementation Notes
+1. **Bilingual Support**: Arabic and English names
+2. **Logo Management**: Single logo per partner via Spatie Media Library
+3. **Contact Information**: Website, phone, and email
+4. **Featured Partners**: Special highlighting for important partners
+5. **Sort Order**: Custom display ordering
+6. **Active Status**: Enable/disable partners
+7. **Admin Interface**: Full CRUD operations via Filament
+8. **Frontend Display**: Grid layout with logos
+9. **Responsive Design**: 2/3/5 columns based on screen size
+10. **Fallback Display**: Text name when no logo available
+
+## Usage in Views
+```php
+// Display partners grid
+@foreach($partners as $partner)
+    <div class="partner-card">
+        @if($partner->logo_url)
+            <img src="{{ $partner->logo_url }}" alt="{{ $partner->name_ar }}">
+        @else
+            <h3>{{ $partner->name_ar }}</h3>
+        @endif
+        
+        @if($partner->website_url)
+            <a href="{{ $partner->website_url }}" target="_blank">Visit Website</a>
+        @endif
+    </div>
+@endforeach
+
+// Featured partners only
+@foreach($partners->where('is_featured', true) as $partner)
+    // Display featured partner
+@endforeach
+```
+
+## Database Seeder Sample Data
+The seeder creates 5 sample partners with:
+- **Bilingual Names**: Arabic and English company names
+- **Contact Details**: Website URLs, phone numbers, email addresses
+- **Featured Status**: All partners set as featured
+- **Active Status**: All partners set as active
+- **Proper Ordering**: Sort order from 1-5
+
+## Key Features
+- **Logo Management**: SVG, PNG, JPG support for partner logos
+- **Contact Integration**: Website, phone, and email links
+- **Featured System**: Highlight important partners
+- **Bilingual Support**: Arabic and English names
+- **Responsive Grid**: Mobile-friendly partner display
+- **Admin Interface**: Easy partner management
+- **Sort Control**: Custom display ordering
+- **Active Toggle**: Enable/disable partners
+- **Media Integration**: Spatie Media Library for logos
+- **Clean Design**: Professional partner showcase
+
+## Frontend Display Features
+- **Grid Layout**: Responsive 2/3/5 column grid
+- **Logo Display**: High-quality logo rendering
+- **Hover Effects**: Smooth shadow transitions
+- **Fallback Text**: Company names when no logo
+- **External Links**: Website links open in new tabs
+- **Mobile Optimized**: Touch-friendly partner cards
+- **Loading States**: Smooth image loading
+- **Accessibility**: Proper alt text and labels

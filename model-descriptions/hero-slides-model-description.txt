@@ -1,0 +1,228 @@
+# Hero Slides Model - Complete Description
+# مودل شرائح الصفحة الرئيسية
+
+## Model Overview
+- **Model Name**: HeroSlide
+- **Table Name**: hero_slides
+- **Purpose**: Manages hero slides for the homepage with images, text content, and call-to-action buttons
+- **File Location**: app/Models/HeroSlide.php
+
+## Database Structure (Migration)
+```php
+// Migration: 2025_01_07_000006_create_hero_slides_table.php
+Schema::create('hero_slides', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');                    // Main slide title
+    $table->string('subtitle')->nullable();     // Optional subtitle
+    $table->text('description')->nullable();    // Slide description
+    $table->string('button_text')->nullable();  // First button text
+    $table->string('button_url')->nullable();   // First button URL
+    $table->string('button_text_2')->nullable(); // Second button text
+    $table->string('button_url_2')->nullable();  // Second button URL
+    $table->boolean('is_active')->default(true); // Active status
+    $table->integer('sort_order')->default(0);   // Display order
+    $table->timestamps();
+});
+```
+
+## Model Properties
+```php
+// Fillable attributes
+protected $fillable = [
+    'title',
+    'subtitle', 
+    'description',
+    'button_text',
+    'button_url',
+    'button_text_2',
+    'button_url_2',
+    'is_active',
+    'sort_order'
+];
+
+// Casts
+protected $casts = [
+    'is_active' => 'boolean',
+];
+```
+
+## Model Methods & Scopes
+```php
+// Scopes
+public function scopeActive($query)
+{
+    return $query->where('is_active', true);
+}
+
+public function scopeOrdered($query)
+{
+    return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
+}
+
+// Accessors
+public function getImageUrlAttribute(): ?string
+{
+    return $this->getFirstMediaUrl('hero_image');
+}
+
+// Arabic accessors for backward compatibility
+public function getTitleArAttribute()
+{
+    return $this->attributes['title'];
+}
+
+public function getSubtitleArAttribute()
+{
+    return $this->attributes['subtitle'];
+}
+
+public function getDescriptionArAttribute()
+{
+    return $this->attributes['description'];
+}
+
+public function getButtonTextArAttribute()
+{
+    return $this->attributes['button_text'];
+}
+```
+
+## Media Library Integration
+```php
+// Uses Spatie Media Library
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+// Media collection configuration
+public function registerMediaCollections(): void
+{
+    $this->addMediaCollection('hero_image')
+        ->useDisk('public')
+        ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+}
+```
+
+## Filament Resource Configuration
+- **Resource File**: app/Filament/Resources/HeroSlides/HeroSlideResource.php
+- **Navigation Label**: 'الشرائح الرئيسية'
+- **Model Label**: 'شريحة رئيسية'
+- **Navigation Group**: 'إدارة المحتوى'
+- **Navigation Sort**: 2
+- **Icon**: Heroicon::OutlinedRectangleStack
+
+### Form Schema (HeroSlideForm.php)
+```php
+// Form components
+- TextInput::make('title')->label('العنوان')->required()
+- TextInput::make('subtitle')->label('العنوان الفرعي')
+- Textarea::make('description')->label('الوصف')->columnSpanFull()
+- TextInput::make('button_text')->label('نص الزر 1')
+- TextInput::make('button_url')->label('رابط الزر 1')
+- TextInput::make('button_text_2')->label('نص الزر 2')
+- TextInput::make('button_url_2')->label('رابط الزر 2')
+- Toggle::make('is_active')->label('نشط')->required()
+- TextInput::make('sort_order')->label('ترتيب العرض')->numeric()->default(0)
+- SpatieMediaLibraryFileUpload::make('hero_image')
+    ->label('صورة الشريحة')
+    ->collection('hero_image')
+    ->disk('public')
+    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+    ->maxSize(2048)
+    ->columnSpanFull()
+```
+
+### Resource Pages
+- **List Page**: ListHeroSlides.php
+- **Create Page**: CreateHeroSlide.php
+- **Edit Page**: EditHeroSlide.php
+- **View Page**: ViewHeroSlide.php
+
+## Controller Usage
+```php
+// In HomeController.php
+public function index()
+{
+    $heroSlides = HeroSlide::active()->ordered()->get();
+    return view('home', compact('heroSlides'));
+}
+```
+
+## Seeder Configuration
+```php
+// File: database/seeders/HeroSlideSeeder.php
+// Sample data includes 3 hero slides with Arabic content
+// Each slide has title, subtitle, description, buttons, and sort order
+```
+
+## Required Packages
+1. **Spatie Media Library** (spatie/laravel-medialibrary)
+   - For image upload and management
+   - Collection: 'hero_image'
+   - Disk: 'public'
+   - Accepted types: jpeg, png, webp, gif
+
+2. **Filament** (filament/filament)
+   - For admin panel interface
+   - Version: 4.x compatible
+
+## JavaScript Requirements
+- **No custom JavaScript required**
+- Uses standard Filament components
+- Image upload handled by Filament's SpatieMediaLibraryFileUpload component
+
+## Additional Files Structure
+```
+app/Models/HeroSlide.php
+app/Filament/Resources/HeroSlides/
+├── HeroSlideResource.php
+├── Pages/
+│   ├── ListHeroSlides.php
+│   ├── CreateHeroSlide.php
+│   ├── EditHeroSlide.php
+│   └── ViewHeroSlide.php
+├── Schemas/
+│   ├── HeroSlideForm.php
+│   └── HeroSlideInfolist.php
+└── Tables/
+    └── HeroSlidesTable.php
+
+database/
+├── migrations/2025_01_07_000006_create_hero_slides_table.php
+└── seeders/HeroSlideSeeder.php
+```
+
+## Implementation Notes
+1. **Multilingual Support**: Model includes Arabic accessors for backward compatibility
+2. **Image Management**: Uses Spatie Media Library for flexible image handling
+3. **Ordering**: Supports custom sort order with fallback to creation date
+4. **Active Status**: Toggle for enabling/disabling slides
+5. **Dual Buttons**: Supports up to 2 call-to-action buttons per slide
+6. **Validation**: Form includes required fields and file type restrictions
+7. **Admin Interface**: Full CRUD operations through Filament admin panel
+
+## Usage in Views
+```php
+// In Blade templates
+@foreach($heroSlides as $slide)
+    <div class="hero-slide">
+        <img src="{{ $slide->image_url }}" alt="{{ $slide->title }}">
+        <h1>{{ $slide->title }}</h1>
+        <h2>{{ $slide->subtitle }}</h2>
+        <p>{{ $slide->description }}</p>
+        @if($slide->button_text)
+            <a href="{{ $slide->button_url }}" class="btn">{{ $slide->button_text }}</a>
+        @endif
+        @if($slide->button_text_2)
+            <a href="{{ $slide->button_url_2 }}" class="btn">{{ $slide->button_text_2 }}</a>
+        @endif
+    </div>
+@endforeach
+```
+
+## Database Seeder Sample Data
+The seeder includes 3 sample slides with Arabic content:
+1. Welcome slide with product discovery CTA
+2. Quality assurance slide with catalog CTA  
+3. Partnership slide with collaboration CTA
+
+Each slide includes proper sort order and active status configuration.

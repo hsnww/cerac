@@ -1,0 +1,372 @@
+# Products Model - Complete Description
+# مودل المنتجات
+
+## Model Overview
+- **Model Name**: Product
+- **Table Name**: products
+- **Purpose**: Manages product catalog with multilingual support and media management
+- **File Location**: app/Models/Product.php
+- **Features**: Bilingual content, image galleries, specification documents, features management
+
+## Database Structure (Migration)
+```php
+// Migration: 2025_01_07_000002_create_products_table.php
+Schema::create('products', function (Blueprint $table) {
+    $table->id();
+    $table->string('title_ar');              // Arabic title
+    $table->string('title_en');              // English title
+    $table->text('description_ar')->nullable(); // Arabic description
+    $table->text('description_en')->nullable(); // English description
+    $table->json('features_ar')->nullable();    // Arabic features array
+    $table->json('features_en')->nullable();    // English features array
+    $table->boolean('is_active')->default(true); // Active status
+    $table->integer('sort_order')->default(0);   // Display order
+    $table->timestamps();
+});
+```
+
+## Model Properties
+```php
+// Fillable attributes
+protected $fillable = [
+    'title_ar', 'title_en', 'description_ar', 'description_en',
+    'features_ar', 'features_en', 'is_active', 'sort_order'
+];
+
+// Casts
+protected $casts = [
+    'is_active' => 'boolean',
+    'features_ar' => 'array',
+    'features_en' => 'array',
+];
+```
+
+## Model Methods & Scopes
+```php
+// Scopes
+public function scopeActive($query)
+{
+    return $query->where('is_active', true);
+}
+
+public function scopeOrdered($query)
+{
+    return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
+}
+
+// Accessors
+public function getImageUrlAttribute(): ?string
+{
+    return $this->getFirstMediaUrl('product_cover')
+        ?: $this->getFirstMediaUrl('product_gallery');
+}
+
+public function getCoverImageUrlAttribute(): ?string
+{
+    return $this->getFirstMediaUrl('product_cover');
+}
+
+public function getSpecDocumentUrlAttribute(): ?string
+{
+    return $this->getFirstMediaUrl('product_spec_document');
+}
+
+// Backward compatibility accessors
+public function getNameArAttribute()
+{
+    return $this->attributes['title_ar'];
+}
+
+public function getNameEnAttribute()
+{
+    return $this->attributes['title_en'];
+}
+```
+
+## Media Library Integration
+```php
+// Uses Spatie Media Library
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+// Media collections configuration
+public function registerMediaCollections(): void
+{
+    // Cover image (single file)
+    $this->addMediaCollection('product_cover')
+        ->useDisk('public')
+        ->singleFile()
+        ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+    // Gallery images (multiple files)
+    $this->addMediaCollection('product_gallery')
+        ->useDisk('public')
+        ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+    // Specification documents (PDF/Word)
+    $this->addMediaCollection('product_spec_document')
+        ->useDisk('public')
+        ->acceptsMimeTypes([
+            'application/pdf', 
+            'application/msword', 
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ]);
+}
+```
+
+## Filament Resource Configuration
+- **Resource File**: app/Filament/Resources/Products/ProductResource.php
+- **Navigation Label**: 'المنتجات'
+- **Model Label**: 'منتج'
+- **Navigation Group**: 'إدارة الأقسام'
+- **Navigation Sort**: 1
+- **Icon**: Heroicon::OutlinedRectangleStack
+
+### Form Schema (ProductForm.php)
+```php
+// Form components
+- TextInput::make('title_ar')->label('عنوان المنتج (عربي)')->required()
+- TextInput::make('title_en')->label('عنوان المنتج (إنجليزي)')->required()
+- Textarea::make('description_ar')->label('وصف المنتج (عربي)')->columnSpanFull()
+- Textarea::make('description_en')->label('وصف المنتج (إنجليزي)')->columnSpanFull()
+- TextInput::make('features_ar')->label('المميزات (عربي)')
+  ->placeholder('افصل العناصر بفاصلة ,')
+- TextInput::make('features_en')->label('المميزات (إنجليزي)')
+  ->placeholder('Separate items with a comma ,')
+- Toggle::make('is_active')->label('نشط')->required()
+- TextInput::make('sort_order')->label('ترتيب العرض')->numeric()->default(0)
+
+// Media uploads
+- SpatieMediaLibraryFileUpload::make('product_cover')
+  ->label('صورة الغلاف')
+  ->collection('product_cover')
+  ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+  ->maxSize(2048)
+  ->columnSpanFull()
+
+- SpatieMediaLibraryFileUpload::make('product_gallery')
+  ->label('معرض الصور')
+  ->collection('product_gallery')
+  ->multiple()
+  ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+  ->maxSize(2048)
+  ->columnSpanFull()
+
+- SpatieMediaLibraryFileUpload::make('product_spec_document')
+  ->label('ملف المواصفات (PDF / Word)')
+  ->collection('product_spec_document')
+  ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+  ->maxSize(102400) // 100 MB
+  ->columnSpanFull()
+```
+
+### Resource Pages
+- **List Page**: ListProducts.php
+- **Create Page**: CreateProduct.php
+- **Edit Page**: EditProduct.php
+- **View Page**: ViewProduct.php
+
+## Controller Usage
+```php
+// File: app/Http/Controllers/ProductController.php
+
+// Products index page
+public function index()
+{
+    $settings = SiteSetting::getSettings();
+    $products = Product::with('media')->get();
+    return view('products.index', compact('products', 'settings'));
+}
+
+// Single product page
+public function show(Product $product)
+{
+    $settings = SiteSetting::getSettings();
+    $product->load('media');
+    
+    // Get related products
+    $relatedProducts = Product::with('media')
+        ->active()
+        ->where('id', '!=', $product->id)
+        ->ordered()
+        ->take(3)
+        ->get();
+    
+    return view('products.show', compact('product', 'relatedProducts', 'settings'));
+}
+```
+
+## Frontend Views
+
+### Products Index (products/index.blade.php)
+```php
+// Features:
+- Hero section with site branding
+- Grid layout for products (responsive)
+- Product cards with cover images
+- Product titles and descriptions
+- Features display
+- "View Details" buttons
+- Empty state handling
+- Responsive design (1/2/3 columns)
+```
+
+### Product Details (products/show.blade.php)
+```php
+// Features:
+- Hero section with product title
+- Two-column layout (images + details)
+- Cover image display
+- Image gallery with modal
+- Specification document download
+- Product description and features
+- Related products section
+- Image modal with navigation
+- Responsive design
+- Call-to-action buttons
+```
+
+## JavaScript Requirements
+**File**: Embedded in product show view
+
+### Image Modal Functionality:
+```javascript
+function openImageModal(imageUrl, caption) {
+    // Display image in modal
+    // Set caption
+    // Show modal
+    // Disable body scroll
+}
+
+function closeImageModal() {
+    // Hide modal
+    // Enable body scroll
+}
+
+// Event listeners:
+// - Click outside modal to close
+// - Escape key to close
+// - Gallery image clicks
+```
+
+## Required Packages
+1. **Spatie Media Library** (spatie/laravel-medialibrary)
+   - For image and document management
+   - Collections: 'product_cover', 'product_gallery', 'product_spec_document'
+   - Disk: 'public'
+   - Image types: jpeg, png, webp, gif
+   - Document types: PDF, Word
+
+2. **Filament** (filament/filament)
+   - For admin panel interface
+   - Version: 4.x compatible
+
+## Additional Files Structure
+```
+app/Models/Product.php
+app/Http/Controllers/ProductController.php
+app/Filament/Resources/Products/
+├── ProductResource.php
+├── Pages/
+│   ├── ListProducts.php
+│   ├── CreateProduct.php
+│   ├── EditProduct.php
+│   └── ViewProduct.php
+├── Schemas/
+│   ├── ProductForm.php
+│   └── ProductInfolist.php
+└── Tables/
+    └── ProductsTable.php
+
+resources/views/products/
+├── index.blade.php
+└── show.blade.php
+
+database/
+├── migrations/2025_01_07_000002_create_products_table.php
+└── seeders/ProductSeeder.php
+```
+
+## Routes Configuration
+```php
+// In routes/web.php
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+```
+
+## Seeder Configuration
+```php
+// File: database/seeders/ProductSeeder.php
+// Creates 6 sample products:
+// 1. CERAC White Adhesive - General purpose adhesive
+// 2. CERAC Gray Adhesive - Industrial/commercial use
+// 3. Crack Filling Paste - Flexible crack filler
+// 4. Trowel Mix - Trowel application adhesive
+// 5. Super CERAC - Ultra-strength adhesive
+// 6. CERAC Gallon - Large volume container
+
+// Each product includes:
+// - Arabic and English titles
+// - Arabic and English descriptions
+// - Arabic and English features arrays
+// - Active status and sort order
+```
+
+## Implementation Notes
+1. **Multilingual Support**: Full Arabic/English content support
+2. **Media Management**: Three different media collections for different purposes
+3. **Features Array**: JSON storage for product features lists
+4. **Image Fallback**: Cover image falls back to gallery images
+5. **Document Support**: PDF and Word document uploads for specifications
+6. **Responsive Design**: Mobile-friendly product display
+7. **Image Gallery**: Modal-based image viewing
+8. **Related Products**: Automatic related product suggestions
+9. **SEO Friendly**: Proper meta titles and descriptions
+10. **Admin Interface**: Full CRUD operations via Filament
+
+## Usage in Views
+```php
+// Product listing
+@foreach($products as $product)
+    <div class="product-card">
+        <img src="{{ $product->cover_image_url }}" alt="{{ $product->name_ar }}">
+        <h3>{{ $product->name_ar }}</h3>
+        <p>{{ $product->description_ar }}</p>
+        @if($product->features_ar)
+            <ul>
+                @foreach($product->features_ar as $feature)
+                    <li>{{ $feature }}</li>
+                @endforeach
+            </ul>
+        @endif
+        <a href="{{ route('products.show', $product) }}">View Details</a>
+    </div>
+@endforeach
+
+// Product details
+<h1>{{ $product->name_ar }}</h1>
+<p>{{ $product->description_ar }}</p>
+@if($product->spec_document_url)
+    <a href="{{ $product->spec_document_url }}" target="_blank">Download Specifications</a>
+@endif
+```
+
+## Database Seeder Sample Data
+The seeder creates 6 sample products with:
+- **Bilingual Content**: Arabic and English titles, descriptions, features
+- **Product Categories**: Different types of adhesives and building materials
+- **Features Arrays**: JSON arrays of product features
+- **Proper Ordering**: Sort order for display sequence
+- **Active Status**: All products set as active by default
+
+## Key Features
+- **Multilingual**: Complete Arabic/English support
+- **Media Rich**: Cover images, galleries, and documents
+- **Feature Management**: JSON-based features storage
+- **Responsive Design**: Mobile-optimized layouts
+- **Image Gallery**: Modal-based image viewing
+- **Document Downloads**: PDF/Word specification files
+- **Related Products**: Automatic product suggestions
+- **Admin Interface**: Full CRUD operations
+- **SEO Optimized**: Proper meta data and structure
+- **Performance**: Optimized queries with media loading

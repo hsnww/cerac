@@ -1,0 +1,328 @@
+# Clients Model - Complete Description
+# مودل العملاء
+
+## Model Overview
+- **Model Name**: Client
+- **Table Name**: clients
+- **Purpose**: Manages client companies with logos and project relationships
+- **File Location**: app/Models/Client.php
+- **Features**: Bilingual support, logo management, project relationships, featured clients
+
+## Database Structure (Migration)
+```php
+// Migration: 2025_01_07_000004_create_clients_table.php
+Schema::create('clients', function (Blueprint $table) {
+    $table->id();
+    $table->string('name_ar');                    // Arabic name
+    $table->string('name_en')->nullable();        // English name
+    $table->string('website_url')->nullable();    // Website URL
+    $table->boolean('is_featured')->default(false); // Featured client
+    $table->boolean('is_active')->default(true);   // Active status
+    $table->integer('sort_order')->default(0);     // Display order
+    $table->timestamps();
+});
+```
+
+## Model Properties
+```php
+// Fillable attributes
+protected $fillable = [
+    'name_ar', 'name_en', 'website_url', 'is_featured', 
+    'is_active', 'sort_order'
+];
+
+// Casts
+protected $casts = [
+    'is_featured' => 'boolean',
+    'is_active' => 'boolean',
+];
+```
+
+## Model Methods & Scopes
+```php
+// Scopes
+public function scopeActive($query)
+{
+    return $query->where('is_active', true);
+}
+
+public function scopeOrdered($query)
+{
+    return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
+}
+
+// Relationships
+public function projects()
+{
+    return $this->hasMany(Project::class);
+}
+
+// Accessors
+public function getLogoUrlAttribute(): ?string
+{
+    return $this->getFirstMediaUrl('logo');
+}
+
+// Backward compatibility accessors
+public function getNameArAttribute()
+{
+    return $this->attributes['name_ar'];
+}
+
+public function getNameEnAttribute()
+{
+    return $this->attributes['name_en'];
+}
+```
+
+## Media Library Integration
+```php
+// Uses Spatie Media Library
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+// Media collection configuration
+public function registerMediaCollections(): void
+{
+    $this->addMediaCollection('logo')
+        ->useDisk('public')
+        ->acceptsMimeTypes([
+            'image/jpeg', 'image/png', 'image/webp', 
+            'image/gif', 'image/svg+xml'
+        ]);
+}
+```
+
+## Relationships
+```php
+// One-to-Many relationship with Projects
+public function projects()
+{
+    return $this->hasMany(Project::class);
+}
+
+// Usage in Project model
+public function client()
+{
+    return $this->belongsTo(Client::class);
+}
+```
+
+## Filament Resource Configuration
+- **Resource File**: app/Filament/Resources/Clients/ClientResource.php
+- **Navigation Label**: 'العملاء'
+- **Model Label**: 'عميل'
+- **Navigation Group**: 'إدارة الأقسام'
+- **Navigation Sort**: 3
+- **Icon**: Heroicon::OutlinedRectangleStack
+
+### Form Schema (ClientForm.php)
+```php
+// Form components
+- TextInput::make('name_ar')->label('اسم العميل (عربي)')->required()
+- TextInput::make('name_en')->label('اسم العميل (إنجليزي)')
+- TextInput::make('website_url')->label('رابط الموقع')
+  ->placeholder('https://example.com')
+- Toggle::make('is_featured')->label('مميز')->required()
+- Toggle::make('is_active')->label('نشط')->required()
+- TextInput::make('sort_order')->label('ترتيب العرض')
+  ->numeric()->default(0)
+- SpatieMediaLibraryFileUpload::make('logo')
+  ->label('شعار العميل')
+  ->collection('logo')
+  ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'])
+  ->maxSize(2048)
+  ->columnSpanFull()
+```
+
+### Resource Pages
+- **List Page**: ListClients.php
+- **Create Page**: CreateClient.php
+- **Edit Page**: EditClient.php
+- **View Page**: ViewClient.php
+
+## Controller Usage
+```php
+// In HomeController.php
+public function index()
+{
+    $clients = Client::active()->ordered()->get();
+    return view('home', compact('clients'));
+}
+
+// In ProjectController.php
+public function show(Project $project)
+{
+    $project->load('client');
+    return view('projects.show', compact('project'));
+}
+```
+
+## Frontend Usage
+```php
+// In home.blade.php - Clients section
+@if($clients->count() > 0)
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">عملاؤنا</h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            @foreach($clients as $client)
+            <div class="flex items-center justify-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                @if($client->logo_url)
+                    <img src="{{ $client->logo_url }}" 
+                         alt="{{ $client->name_ar }}" 
+                         class="max-h-16 max-w-full object-contain">
+                @else
+                    <div class="text-center">
+                        <h3 class="text-sm font-medium text-gray-900">{{ $client->name_ar }}</h3>
+                    </div>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
+// In projects views - Client information
+@if($project->client)
+    <div class="client-info">
+        <h3>العميل: {{ $project->client->name_ar }}</h3>
+        @if($project->client->logo_url)
+            <img src="{{ $project->client->logo_url }}" alt="{{ $project->client->name_ar }}">
+        @endif
+    </div>
+@endif
+```
+
+## Required Packages
+1. **Spatie Media Library** (spatie/laravel-medialibrary)
+   - For logo image management
+   - Collection: 'logo'
+   - Disk: 'public'
+   - Accepted types: jpeg, png, webp, gif, svg
+
+2. **Filament** (filament/filament)
+   - For admin panel interface
+   - Version: 4.x compatible
+
+## Additional Files Structure
+```
+app/Models/Client.php
+app/Filament/Resources/Clients/
+├── ClientResource.php
+├── Pages/
+│   ├── ListClients.php
+│   ├── CreateClient.php
+│   ├── EditClient.php
+│   └── ViewClient.php
+├── Schemas/
+│   ├── ClientForm.php
+│   └── ClientInfolist.php
+└── Tables/
+    └── ClientsTable.php
+
+database/
+├── migrations/2025_01_07_000004_create_clients_table.php
+└── seeders/ClientSeeder.php
+```
+
+## Seeder Configuration
+```php
+// File: database/seeders/ClientSeeder.php
+// Creates 7 sample clients:
+// 1. شركة البناء الحديث - Modern Construction Co.
+// 2. مؤسسة المقاولات المتقدمة - Advanced Contracting Est.
+// 3. شركة الإنشاءات الكبرى - Major Construction Co.
+// 4. مجموعة المشاريع المتكاملة - Integrated Projects Group
+// 5. شركة التطوير العقاري - Real Estate Development Co.
+// 6. مؤسسة البناء المستدام - Sustainable Building Est.
+// 7. شركة المشاريع الكبرى - Mega Projects Co.
+
+// Each client includes:
+// - Arabic and English names
+// - Website URLs
+// - Featured status (all set to true)
+// - Active status (all set to true)
+// - Sort order
+```
+
+## Implementation Notes
+1. **Bilingual Support**: Arabic and English names
+2. **Logo Management**: Single logo per client via Spatie Media Library
+3. **Project Relationships**: One-to-many relationship with projects
+4. **Featured Clients**: Special highlighting for important clients
+5. **Sort Order**: Custom display ordering
+6. **Active Status**: Enable/disable clients
+7. **Admin Interface**: Full CRUD operations via Filament
+8. **Frontend Display**: Grid layout with logos
+9. **Responsive Design**: 2/3/4 columns based on screen size
+10. **Fallback Display**: Text name when no logo available
+
+## Usage in Views
+```php
+// Display clients grid
+@foreach($clients as $client)
+    <div class="client-card">
+        @if($client->logo_url)
+            <img src="{{ $client->logo_url }}" alt="{{ $client->name_ar }}">
+        @else
+            <h3>{{ $client->name_ar }}</h3>
+        @endif
+        
+        @if($client->website_url)
+            <a href="{{ $client->website_url }}" target="_blank">Visit Website</a>
+        @endif
+    </div>
+@endforeach
+
+// Featured clients only
+@foreach($clients->where('is_featured', true) as $client)
+    // Display featured client
+@endforeach
+
+// Client with projects
+@foreach($client->projects as $project)
+    <div class="project-item">
+        <h4>{{ $project->title_ar }}</h4>
+        <p>{{ $project->description_ar }}</p>
+    </div>
+@endforeach
+```
+
+## Database Seeder Sample Data
+The seeder creates 7 sample clients with:
+- **Bilingual Names**: Arabic and English company names
+- **Website URLs**: Company website links
+- **Featured Status**: All clients set as featured
+- **Active Status**: All clients set as active
+- **Proper Ordering**: Sort order from 1-7
+
+## Key Features
+- **Logo Management**: SVG, PNG, JPG support for client logos
+- **Project Integration**: Direct relationship with projects
+- **Featured System**: Highlight important clients
+- **Bilingual Support**: Arabic and English names
+- **Responsive Grid**: Mobile-friendly client display
+- **Admin Interface**: Easy client management
+- **Sort Control**: Custom display ordering
+- **Active Toggle**: Enable/disable clients
+- **Media Integration**: Spatie Media Library for logos
+- **Clean Design**: Professional client showcase
+
+## Frontend Display Features
+- **Grid Layout**: Responsive 2/3/4 column grid
+- **Logo Display**: High-quality logo rendering
+- **Hover Effects**: Smooth shadow transitions
+- **Fallback Text**: Company names when no logo
+- **External Links**: Website links open in new tabs
+- **Mobile Optimized**: Touch-friendly client cards
+- **Loading States**: Smooth image loading
+- **Accessibility**: Proper alt text and labels
+
+## Relationship with Projects
+- **One-to-Many**: Each client can have multiple projects
+- **Project Display**: Projects show client information
+- **Client Portfolio**: View all projects for a specific client
+- **Data Integrity**: Foreign key relationship ensures data consistency

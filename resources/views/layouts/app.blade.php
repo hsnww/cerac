@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', $settings->site_name ?? 'سيراك')</title>
     <link rel="icon" type="image/x-icon" href="{{ $settings->favicon_url ?? '/favicon.ico' }}">
@@ -15,6 +15,7 @@
     <style>
         body {
             font-family: 'Cairo', sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
         .hero-title {
             font-family: 'Almarai', sans-serif;
@@ -88,6 +89,97 @@
         
         .z-10 {
             z-index: 10;
+        }
+        
+        /* Mobile Responsive Fixes */
+        @media (max-width: 768px) {
+            .py-16 {
+                padding-top: 2rem;
+                padding-bottom: 2rem;
+            }
+            
+            .py-20 {
+                padding-top: 2.5rem;
+                padding-bottom: 2.5rem;
+            }
+            
+            /* Ensure proper mobile spacing */
+            .px-4 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            /* Fix hero section height on mobile */
+            .h-\[500px\] {
+                height: 300px;
+            }
+            
+            /* Mobile text sizes */
+            .text-4xl {
+                font-size: 2rem;
+            }
+            
+            .text-6xl {
+                font-size: 2.5rem;
+            }
+            
+            .text-3xl {
+                font-size: 1.875rem;
+            }
+            
+            /* Mobile grid adjustments */
+            .grid-cols-1 {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+            
+            /* Mobile button adjustments */
+            .btn-primary {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.875rem;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .px-4 {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+            
+            .h-\[500px\] {
+                height: 250px;
+            }
+            
+            .text-4xl {
+                font-size: 1.75rem;
+            }
+            
+            .text-6xl {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Prevent horizontal overflow */
+        * {
+            box-sizing: border-box;
+        }
+        
+        /* Fix for RTL layout issues */
+        [dir="rtl"] {
+            text-align: right;
+        }
+        
+        /* Desktop Menu Fixes - Using Tailwind classes only */
+        
+        /* Ensure proper container width */
+        .max-w-7xl {
+            max-width: 80rem;
+        }
+        
+        @media (max-width: 1280px) {
+            .max-w-7xl {
+                max-width: 100%;
+            }
         }
     </style>
     

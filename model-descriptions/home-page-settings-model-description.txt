@@ -1,0 +1,212 @@
+# Home Page Settings Model - Complete Description
+# مودل إعدادات الصفحة الرئيسية
+
+## Model Overview
+- **Model Name**: HomePageSetting
+- **Table Name**: home_page_settings
+- **Purpose**: Manages homepage section visibility and ordering settings
+- **File Location**: app/Models/HomePageSetting.php
+- **Type**: Singleton model (only one record exists)
+
+## Database Structure (Migration)
+```php
+// Migration: 2025_01_08_000110_create_home_page_settings_table.php
+Schema::create('home_page_settings', function (Blueprint $table) {
+    $table->id();
+    
+    // Section visibility toggles
+    $table->boolean('show_hero')->default(true);
+    $table->boolean('show_cta')->default(true);
+    $table->boolean('show_products')->default(true);
+    $table->boolean('show_partners')->default(true);
+    $table->boolean('show_projects')->default(true);
+    $table->boolean('show_clients')->default(true);
+    $table->boolean('show_contact_teaser')->default(true);
+    
+    // Section ordering
+    $table->unsignedSmallInteger('order_hero')->default(1);
+    $table->unsignedSmallInteger('order_cta')->default(2);
+    $table->unsignedSmallInteger('order_products')->default(3);
+    $table->unsignedSmallInteger('order_partners')->default(4);
+    $table->unsignedSmallInteger('order_projects')->default(5);
+    $table->unsignedSmallInteger('order_clients')->default(6);
+    $table->unsignedSmallInteger('order_contact_teaser')->default(7);
+    
+    $table->timestamps();
+});
+```
+
+## Model Properties
+```php
+// Fillable attributes
+protected $fillable = [
+    'show_hero', 'show_cta', 'show_products', 'show_partners', 
+    'show_projects', 'show_clients', 'show_contact_teaser',
+    'order_hero', 'order_cta', 'order_products', 'order_partners', 
+    'order_projects', 'order_clients', 'order_contact_teaser',
+];
+
+// No casts needed - all fields are boolean or integer
+```
+
+## Model Methods
+```php
+// Singleton pattern - get or create single settings record
+public static function getSettings(): self
+{
+    return static::query()->first() ?? static::create();
+}
+```
+
+## Filament Resource Configuration
+- **Resource File**: app/Filament/Resources/HomePageSettingResource.php
+- **Navigation Label**: 'الصفحة الرئيسية'
+- **Navigation Group**: 'اعدادات الموقع'
+- **Icon**: Heroicon::OutlinedRectangleStack
+
+### Form Schema
+```php
+// Form components for each section
+Toggle::make('show_hero')->label('إظهار الهيرو'),
+TextInput::make('order_hero')->label('ترتيب الهيرو')->numeric()->default(1),
+
+Toggle::make('show_cta')->label('إظهار CTA'),
+TextInput::make('order_cta')->label('ترتيب CTA')->numeric()->default(2),
+
+Toggle::make('show_products')->label('إظهار المنتجات'),
+TextInput::make('order_products')->label('ترتيب المنتجات')->numeric()->default(3),
+
+Toggle::make('show_partners')->label('إظهار الشركاء'),
+TextInput::make('order_partners')->label('ترتيب الشركاء')->numeric()->default(4),
+
+Toggle::make('show_projects')->label('إظهار الأعمال'),
+TextInput::make('order_projects')->label('ترتيب الأعمال')->numeric()->default(5),
+
+Toggle::make('show_clients')->label('إظهار العملاء'),
+TextInput::make('order_clients')->label('ترتيب العملاء')->numeric()->default(6),
+
+Toggle::make('show_contact_teaser')->label('إظهار تواصل مختصر'),
+TextInput::make('order_contact_teaser')->label('ترتيب تواصل مختصر')->numeric()->default(7),
+```
+
+### Table Configuration
+```php
+// Simple table with ID and last update time
+TextColumn::make('id')->label('ID'),
+TextColumn::make('updated_at')->label('آخر تحديث')->dateTime(),
+```
+
+### Resource Pages
+- **Manage Page**: ManageHomePageSetting.php (handles singleton behavior)
+- **Edit Page**: EditHomePageSetting.php
+
+### Custom Navigation URL
+```php
+// Direct navigation to edit page if record exists
+public static function getNavigationUrl(): string
+{
+    $record = HomePageSetting::query()->first();
+    return $record
+        ? static::getUrl('edit', ['record' => $record])
+        : static::getUrl('index');
+}
+```
+
+## Controller Usage
+```php
+// In HomeController.php
+public function index()
+{
+    $homeSettings = HomePageSetting::getSettings();
+    
+    // Create ordered sections array
+    $homeSections = collect([
+        ['key' => 'hero', 'show' => $homeSettings->show_hero, 'order' => $homeSettings->order_hero],
+        ['key' => 'cta', 'show' => $homeSettings->show_cta, 'order' => $homeSettings->order_cta],
+        ['key' => 'products', 'show' => $homeSettings->show_products, 'order' => $homeSettings->order_products],
+        ['key' => 'partners', 'show' => $homeSettings->show_partners, 'order' => $homeSettings->order_partners],
+        ['key' => 'projects', 'show' => $homeSettings->show_projects, 'order' => $homeSettings->order_projects],
+        ['key' => 'clients', 'show' => $homeSettings->show_clients, 'order' => $homeSettings->order_clients],
+        ['key' => 'contact', 'show' => $homeSettings->show_contact_teaser, 'order' => $homeSettings->order_contact_teaser],
+    ])->where('show', true)->sortBy('order')->values();
+    
+    return view('home', compact('homeSettings', 'homeSections'));
+}
+```
+
+## Seeder Configuration
+```php
+// File: database/seeders/HomePageSettingSeeder.php
+// Creates default settings with all sections enabled
+// Default order: Hero(1), CTA(2), Products(3), Partners(4), Projects(5), Clients(6), Contact(7)
+```
+
+## Required Packages
+1. **Filament** (filament/filament)
+   - For admin panel interface
+   - Version: 4.x compatible
+   - No additional packages required
+
+## JavaScript Requirements
+- **No custom JavaScript required**
+- Uses standard Filament components
+- All interactions handled by Filament's built-in functionality
+
+## Additional Files Structure
+```
+app/Models/HomePageSetting.php
+app/Filament/Resources/HomePageSettingResource.php
+app/Filament/Resources/HomePageSettingResource/Pages/
+├── ManageHomePageSetting.php
+└── EditHomePageSetting.php
+
+database/
+├── migrations/2025_01_08_000110_create_home_page_settings_table.php
+└── seeders/HomePageSettingSeeder.php
+```
+
+## Implementation Notes
+1. **Singleton Pattern**: Only one settings record should exist
+2. **Section Management**: Controls visibility and order of homepage sections
+3. **Default Values**: All sections enabled by default with logical ordering
+4. **Admin Interface**: Simple toggle and numeric input interface
+5. **Dynamic Homepage**: Homepage sections render based on these settings
+6. **No Relationships**: Standalone settings model
+7. **Auto-creation**: Settings record created automatically if none exists
+
+## Homepage Sections Controlled
+1. **Hero Section** (show_hero, order_hero)
+2. **CTA Section** (show_cta, order_cta) 
+3. **Products Section** (show_products, order_products)
+4. **Partners Section** (show_partners, order_partners)
+5. **Projects Section** (show_projects, order_projects)
+6. **Clients Section** (show_clients, order_clients)
+7. **Contact Teaser Section** (show_contact_teaser, order_contact_teaser)
+
+## Usage in Views
+```php
+// In Blade templates
+@foreach($homeSections as $section)
+    @if($section['key'] === 'hero' && $section['show'])
+        @include('sections.hero')
+    @elseif($section['key'] === 'products' && $section['show'])
+        @include('sections.products')
+    @elseif($section['key'] === 'partners' && $section['show'])
+        @include('sections.partners')
+    // ... other sections
+    @endif
+@endforeach
+```
+
+## Database Seeder Sample Data
+The seeder creates default settings with:
+- All sections enabled (show_* = true)
+- Logical ordering from 1-7
+- Ready for immediate use
+
+## Key Features
+- **Flexible Homepage**: Easy to show/hide sections
+- **Custom Ordering**: Reorder sections as needed
+- **Admin Friendly**: Simple toggle interface
+- **Performance**: Single record, fast queries
+- **Maintainable**: Centralized homepage configuration

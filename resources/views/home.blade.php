@@ -282,22 +282,22 @@
             <p class="text-lg text-gray-600 max-w-3xl mx-auto">الشركات التي تثق في منتجاتنا</p>
         </div>
         
-        <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             @forelse($clients->take(6) as $client)
-            <div class="bg-white rounded-lg p-3 hover:bg-gray-50 transition-all duration-300 group shadow-sm">
-                <div class="w-full h-10 flex items-center justify-center mb-2">
+            <div class="bg-white rounded-lg p-4 hover:bg-gray-50 transition-all duration-300 group shadow-sm">
+                <div class="w-full h-12 flex items-center justify-center mb-3">
                     @if($client->logo_url)
-                        <img src="{{ $client->logo_url }}" alt="{{ $client->name_ar }}" class="w-full h-full object-contain">
+                        <img src="{{ $client->logo_url }}" alt="{{ $client->name_ar }}" class="max-w-full max-h-full object-contain">
                     @else
-                        <div class="w-full h-10 bg-gray-100 rounded flex items-center justify-center">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-full h-12 bg-gray-100 rounded flex items-center justify-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                             </svg>
                         </div>
                     @endif
                 </div>
                 <div class="text-center">
-                    <p class="text-xs text-gray-600 font-medium leading-tight">{{ $client->name_ar }}</p>
+                    <p class="text-sm text-gray-600 font-medium leading-tight">{{ $client->name_ar }}</p>
                 </div>
             </div>
             @empty
